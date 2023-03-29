@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:igrim/screens/drawing_page.dart';
+import 'package:igrim/screens/home_screen.dart';
 
 void main() {
   runApp(const App());
@@ -14,10 +14,10 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '아이그림',
+      title: '책그림',
       theme: ThemeData(primarySwatch: Colors.blue),
       debugShowCheckedModeBanner: false,
-      home: const DrawingPage(),
+      home: const HomeScreen(),
     );
   }
 }
