@@ -1,15 +1,18 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart' hide Image;
-import 'package:igrim/screens/drawing_canvas/drawing_canvas.dart';
-import 'package:igrim/screens/drawing_canvas/models/drawing_mode.dart';
-import 'package:igrim/screens/drawing_canvas/models/sketch.dart';
-import 'package:igrim/screens/drawing_canvas/widgets/canvas_side_bar.dart';
+import 'package:igrim/models/character_model.dart';
+import 'package:igrim/models/drawing_mode.dart';
+import 'package:igrim/models/sketch.dart';
+import 'package:igrim/services/device_service.dart';
+import 'package:igrim/widgets/canvas_side_bar.dart';
+import 'package:igrim/services/drawing_service.dart';
 import 'package:igrim/main.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:uuid/uuid.dart';
 
-class DrawingPage extends HookWidget {
-  const DrawingPage({Key? key}) : super(key: key);
+class DrawingScreen extends HookWidget {
+  const DrawingScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +23,6 @@ class DrawingPage extends HookWidget {
     final filled = useState<bool>(false);
     final polygonSides = useState<int>(3);
     final backgroundImage = useState<Image?>(null);
-
     final canvasGlobalKey = GlobalKey();
 
     ValueNotifier<Sketch?> currentSketch = useState(null);
@@ -30,6 +32,15 @@ class DrawingPage extends HookWidget {
       duration: const Duration(milliseconds: 150),
       initialValue: 1,
     );
+
+    void onSaveCharacter(bytes, extension) {
+      String id = const Uuid().v4();
+      // String name
+      CharacterModel characterModel = CharacterModel("name", id);
+      DeviceService().saveCharacterFile(bytes, extension, characterModel);
+      Navigator.of(context).pop();
+    }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -72,6 +83,7 @@ class DrawingPage extends HookWidget {
                 filled: filled,
                 polygonSides: polygonSides,
                 backgroundImage: backgroundImage,
+                onSaveCharacter: onSaveCharacter,
               ),
             ),
           ),

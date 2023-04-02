@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:igrim/screens/home_screen.dart';
+import 'package:igrim/services/device_service.dart';
 
 void main() {
   runApp(const App());
@@ -13,6 +14,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DeviceService.clean();
     return MaterialApp(
       title: '책그림',
       theme: ThemeData(primarySwatch: Colors.blue),

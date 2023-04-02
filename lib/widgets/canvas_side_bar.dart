@@ -3,14 +3,13 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
-import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Image;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:igrim/screens/drawing_canvas/models/drawing_mode.dart';
-import 'package:igrim/screens/drawing_canvas/models/sketch.dart';
-import 'package:igrim/screens/drawing_canvas/widgets/color_palette.dart';
+import 'package:igrim/models/drawing_mode.dart';
+import 'package:igrim/models/sketch.dart';
+import 'package:igrim/widgets/color_palette.dart';
 import 'package:igrim/main.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -29,7 +28,7 @@ class CanvasSideBar extends HookWidget {
   final ValueNotifier<bool> filled;
   final ValueNotifier<int> polygonSides;
   final ValueNotifier<ui.Image?> backgroundImage;
-
+  final onSaveCharacter;
   const CanvasSideBar({
     Key? key,
     required this.selectedColor,
@@ -42,6 +41,7 @@ class CanvasSideBar extends HookWidget {
     required this.filled,
     required this.polygonSides,
     required this.backgroundImage,
+    required this.onSaveCharacter,
   }) : super(key: key);
 
   @override
@@ -273,29 +273,16 @@ class CanvasSideBar extends HookWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const Divider(),
-            Row(
-              children: [
-                SizedBox(
-                  width: 140,
-                  child: TextButton(
-                    child: const Text('Export PNG'),
-                    onPressed: () async {
-                      Uint8List? pngBytes = await getBytes();
-                      if (pngBytes != null) saveFile(pngBytes, 'png');
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: 140,
-                  child: TextButton(
-                    child: const Text('Export JPEG'),
-                    onPressed: () async {
-                      Uint8List? pngBytes = await getBytes();
-                      if (pngBytes != null) saveFile(pngBytes, 'jpeg');
-                    },
-                  ),
-                ),
-              ],
+            SizedBox(
+              width: 140,
+              child: TextButton(
+                child: const Text('저장'),
+                onPressed: () async {
+                  // 저장
+                  Uint8List? pngBytes = await getBytes();
+                  if (pngBytes != null) saveFile(pngBytes, 'jpeg');
+                },
+              ),
             ),
             // add about me button or follow buttons
             const Divider(),
@@ -312,24 +299,6 @@ class CanvasSideBar extends HookWidget {
         ),
       ),
     );
-  }
-
-  void saveFile(Uint8List bytes, String extension) async {
-    if (kIsWeb) {
-      html.AnchorElement()
-        ..href = '${Uri.dataFromBytes(bytes, mimeType: 'image/$extension')}'
-        ..download =
-            'FlutterLetsDraw-${DateTime.now().toIso8601String()}.$extension'
-        ..style.display = 'none'
-        ..click();
-    } else {
-      await FileSaver.instance.saveFile(
-        'FlutterLetsDraw-${DateTime.now().toIso8601String()}.$extension',
-        bytes,
-        extension,
-        mimeType: extension == 'png' ? MimeType.PNG : MimeType.JPEG,
-      );
-    }
   }
 
   Future<ui.Image> get _getImage async {
@@ -385,6 +354,10 @@ class CanvasSideBar extends HookWidget {
     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     Uint8List? pngBytes = byteData?.buffer.asUint8List();
     return pngBytes;
+  }
+
+  void saveFile(Uint8List bytes, String extension) async {
+    onSaveCharacter(bytes, extension);
   }
 }
 

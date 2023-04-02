@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:igrim/screens/drawing_canvas/models/drawing_mode.dart';
+import 'package:igrim/models/drawing_mode.dart';
 
 class Sketch {
   final List<Offset> points;

@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'dart:core';
 
 import 'package:flutter/material.dart' hide Image;
-import 'package:igrim/screens/drawing_canvas/models/drawing_mode.dart';
-import 'package:igrim/screens/drawing_canvas/models/sketch.dart';
+import 'package:igrim/models/drawing_mode.dart';
+import 'package:igrim/models/sketch.dart';
 import 'package:igrim/main.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
