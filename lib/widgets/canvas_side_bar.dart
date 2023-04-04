@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:igrim/models/drawing_mode.dart';
 import 'package:igrim/models/sketch.dart';
 import 'package:igrim/widgets/color_palette.dart';
-import 'package:igrim/main.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -29,6 +28,8 @@ class CanvasSideBar extends HookWidget {
   final ValueNotifier<int> polygonSides;
   final ValueNotifier<ui.Image?> backgroundImage;
   final onSaveCharacter;
+  final onCancel;
+
   const CanvasSideBar({
     Key? key,
     required this.selectedColor,
@@ -42,6 +43,7 @@ class CanvasSideBar extends HookWidget {
     required this.polygonSides,
     required this.backgroundImage,
     required this.onSaveCharacter,
+    required this.onCancel,
   }) : super(key: key);
 
   @override
@@ -51,6 +53,8 @@ class CanvasSideBar extends HookWidget {
       currentSketchNotifier: currentSketch,
     ));
     final scrollController = useScrollController();
+    final textController = TextEditingController();
+
     return Container(
       width: 300,
       height: MediaQuery.of(context).size.height < 680 ? 450 : 610,
@@ -247,29 +251,11 @@ class CanvasSideBar extends HookWidget {
                   child: const Text('Clear'),
                   onPressed: () => undoRedoStack.value.clear(),
                 ),
-                TextButton(
-                  onPressed: () async {
-                    if (backgroundImage.value != null) {
-                      backgroundImage.value = null;
-                    } else {
-                      backgroundImage.value = await _getImage;
-                    }
-                  },
-                  child: Text(
-                    backgroundImage.value == null
-                        ? 'Add Background'
-                        : 'Remove Background',
-                  ),
-                ),
-                TextButton(
-                  child: const Text('Fork on Github'),
-                  onPressed: () => _launchUrl(kGithubRepo),
-                ),
               ],
             ),
             const SizedBox(height: 20),
             const Text(
-              'Export',
+              '캐릭터 이름',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const Divider(),
@@ -280,21 +266,24 @@ class CanvasSideBar extends HookWidget {
                 onPressed: () async {
                   // 저장
                   Uint8List? pngBytes = await getBytes();
-                  if (pngBytes != null) saveFile(pngBytes, 'jpeg');
+                  if (pngBytes != null) {
+                    saveFile(textController.text, pngBytes, 'jpeg');
+                  }
+                },
+              ),
+            ),
+            SizedBox(
+              width: 140,
+              child: TextButton(
+                child: const Text('취소'),
+                onPressed: () async {
+                  // 저장
+                  onCancel();
                 },
               ),
             ),
             // add about me button or follow buttons
             const Divider(),
-            Center(
-              child: GestureDetector(
-                onTap: () => _launchUrl('https://github.com/JideGuru'),
-                child: const Text(
-                  'Made with 💙 by JideGuru',
-                  style: TextStyle(fontSize: 12),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -356,8 +345,8 @@ class CanvasSideBar extends HookWidget {
     return pngBytes;
   }
 
-  void saveFile(Uint8List bytes, String extension) async {
-    onSaveCharacter(bytes, extension);
+  void saveFile(String name, Uint8List bytes, String extension) async {
+    onSaveCharacter(name, bytes, extension);
   }
 }
 

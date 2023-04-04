@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:igrim/models/story_model.dart';
 import 'package:igrim/screens/character_make_screen.dart';
+import 'dart:developer' as developer;
+
+import 'package:igrim/widgets/story_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  //final Future<List<TaleModel>> webtoons = ApiService.getTodaysToons();
-
   @override
   Widget build(BuildContext context) {
+    developer.log("Build HomeScreen", name: "HomeScreeb");
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -48,7 +51,8 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => CharacterMakeScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const CharacterMakeScreen()),
               );
             },
             child: const Text(
@@ -62,20 +66,19 @@ class HomeScreen extends StatelessWidget {
   }
 
   // 동화 리스트 생성
-  // ListView makeList(AsyncSnapshot<List<TaleModel>> snapshot) {
-  //   return ListView.separated(
-  //     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-  //     scrollDirection: Axis.horizontal,
-  //     itemCount: snapshot.data!.length,
-  //     itemBuilder: (BuildContext context, int index) {
-  //       var character = snapshot.data![index];
-  //       return CharacterWidget(
-
-  //       );
-  //     },
-  //     separatorBuilder: (BuildContext context, int index) => const SizedBox(
-  //       width: 40,
-  //     ),
-  //   );
-  // }
+  ListView makeList(AsyncSnapshot<List<StoryModel>> snapshot) {
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      scrollDirection: Axis.horizontal,
+      itemCount: snapshot.data!.length,
+      itemBuilder: (BuildContext context, int index) {
+        var story = snapshot.data![index];
+        return StoryWidget(
+            title: story.title, author: story.author, thumb: story.thumb);
+      },
+      separatorBuilder: (BuildContext context, int index) => const SizedBox(
+        width: 40,
+      ),
+    );
+  }
 }

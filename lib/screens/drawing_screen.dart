@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart' hide Image;
-import 'package:igrim/models/character_model.dart';
 import 'package:igrim/models/drawing_mode.dart';
 import 'package:igrim/models/sketch.dart';
 import 'package:igrim/services/device_service.dart';
@@ -9,6 +8,7 @@ import 'package:igrim/widgets/canvas_side_bar.dart';
 import 'package:igrim/services/drawing_service.dart';
 import 'package:igrim/main.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:igrim/widgets/loading_widget.dart';
 import 'package:uuid/uuid.dart';
 
 class DrawingScreen extends HookWidget {
@@ -33,11 +33,61 @@ class DrawingScreen extends HookWidget {
       initialValue: 1,
     );
 
-    void onSaveCharacter(bytes, extension) {
+    void onPressConfirm(name, bytes, extension) {
       String id = const Uuid().v4();
-      // String name
-      CharacterModel characterModel = CharacterModel("name", id);
-      DeviceService().saveCharacterFile(bytes, extension, characterModel);
+      DeviceService().saveCharacterFile(bytes, extension, id, name).then((id) {
+        Navigator.of(context).pop(); //pop 저장중
+        Navigator.of(context).pop(); //pop drawing screen
+      });
+
+      showDialog(
+          // The user CANNOT close this dialog  by pressing outsite it
+          barrierDismissible: false,
+          context: context,
+          builder: (_) {
+            return const LoadingWidget(text: "저장중");
+          });
+    }
+
+    void onSaveCharacter(name, bytes, extension) async {
+      final textController = TextEditingController();
+      String name = "";
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (_) {
+            return Dialog(
+              child: Column(
+                children: [
+                  const Text("캐릭터 이름을 입력해 주세요"),
+                  TextField(
+                    controller: textController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: "캐릭터 이름을 입력해 주세요",
+                    ),
+                  ),
+                  SizedBox(
+                    width: 140,
+                    child: TextButton(
+                      child: const Text('확인'),
+                      onPressed: () {
+                        if (textController.text == "") {
+                        } else {
+                          name = textController.text;
+                          onPressConfirm(name, bytes, extension);
+                          Navigator.of(context).pop(); //pop 캐릭터 이름을 입력해주세요
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          });
+    }
+
+    void onCancel() {
       Navigator.of(context).pop();
     }
 
@@ -84,6 +134,7 @@ class DrawingScreen extends HookWidget {
                 polygonSides: polygonSides,
                 backgroundImage: backgroundImage,
                 onSaveCharacter: onSaveCharacter,
+                onCancel: onCancel,
               ),
             ),
           ),
@@ -121,7 +172,7 @@ class _CustomAppBar extends StatelessWidget {
               icon: const Icon(Icons.menu),
             ),
             const Text(
-              'Let\'s Draw',
+              '캐릭터를 그려주세요',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 19,

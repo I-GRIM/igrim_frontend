@@ -1,7 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:igrim/models/character_model.dart';
 import 'package:igrim/screens/drawing_screen.dart';
-import 'package:igrim/screens/home_screen.dart';
+import 'package:igrim/screens/story_make_screen.dart';
 import 'package:igrim/services/device_service.dart';
 import 'dart:developer' as developer;
 
@@ -13,28 +15,23 @@ class CharacterMakeScreen extends StatefulWidget {
 }
 
 class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
-  final storyMakingDirectoryPath = DeviceService.makeStoryMakingDirectory();
-  Future<List<CharacterModel>> characters = DeviceService.getCharacters();
+  final storyMakingPath = DeviceService.makeStoryMakingDirectory();
+  late Future<List<CharacterModel>> characters;
 
-  void onGoBack(dynamic value) {
-    characters = DeviceService.getCharacters().then((value) {
-      setState(() {});
-      return value;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    setState(() {
+      characters = DeviceService.getCharacters();
     });
-    developer.log(
-        "refresh characters : ${characters.then((value) {
-          for (var element in value) {
-            return element;
-          }
-        })}",
-        name: "CharacterMakeScreen");
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("character screen"),
+        title: const Text("캐릭터 생성"),
       ),
       body: Column(
         children: [
@@ -42,6 +39,8 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
             future: characters,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
+                developer.log("update future builder ${snapshot.data}",
+                    name: "CharacterMakeScreen");
                 return Expanded(
                   child: makeList(snapshot),
                 );
@@ -56,11 +55,7 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const HomeScreen()),
-                    );
+                    Navigator.pop(context);
                   },
                   child: const Text('뒤로가기'),
                 ),
@@ -70,7 +65,9 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => const DrawingScreen()),
-                    ).then(onGoBack);
+                    ).then((value) => setState(() {
+                          characters = DeviceService.getCharacters();
+                        }));
                   },
                   child: const Text('새로운 캐릭터 만들기'),
                 ),
@@ -79,7 +76,7 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const HomeScreen()),
+                          builder: (context) => const StoryMakeScreen()),
                     );
                   },
                   child: const Text('스토리 작성'),
@@ -99,8 +96,12 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
       itemCount: snapshot.data!.length,
       itemBuilder: (BuildContext context, int index) {
         var character = snapshot.data![index];
+        developer.log("build character : ${character.id}",
+            name: "CharacterMakeScreen");
         return CharacterWidget(
           name: character.name,
+          id: character.id,
+          image: character.image,
         );
       },
       separatorBuilder: (BuildContext context, int index) => const SizedBox(
@@ -112,19 +113,22 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
 
 class CharacterWidget extends StatelessWidget {
   final String name;
-
+  final String id;
+  final File image;
   const CharacterWidget({
     super.key,
     required this.name,
+    required this.id,
+    required this.image,
   });
 
-  void onGoBack() {}
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Image(
-          image: AssetImage('assets/imgs/add_character.png'),
+        Image.file(
+          image,
+          width: 100,
           height: 100,
         ),
         Text(

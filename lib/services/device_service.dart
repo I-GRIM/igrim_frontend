@@ -51,8 +51,8 @@ class DeviceService {
               orElse: () => throw Exception('Info Not Found'),
             );
 
-            final character =
-                CharacterModel.fromJson(json.decode(await info.readAsString()));
+            final character = CharacterModel.fromJson(
+                json.decode(await info.readAsString()), img);
             characters.add(character);
           } else {
             //error
@@ -67,12 +67,11 @@ class DeviceService {
       print("chcek device_service, 45");
     }
 
-    return Future.value(characters);
+    return characters;
   }
 
   Future<String> saveCharacterFile(
-      Uint8List bytes, String extension, CharacterModel characterModel) async {
-    final id = characterModel.id;
+      Uint8List bytes, String extension, String id, String name) async {
     final directory = Directory("${await getStoryMakingDirectory()}/charcters");
 
     if (await directory.exists()) {
@@ -87,11 +86,14 @@ class DeviceService {
 
       final jpgFile = File('${directory.path}/$id/img.jpeg');
       final infoFile = File('${directory.path}/$id/info.json');
-      final jsonStr = characterModel.toJson();
+      final jsonStr = json.encode({
+        'name': name,
+        'id': id,
+      });
+
       // Write the compressed bytes to the temporary file
       await jpgFile.writeAsBytes(compressedBytes);
       await infoFile.writeAsString(jsonStr);
-      developer.log("Charater : ${characterModel.name}, ${characterModel.id}");
     } else {
       throw Exception("Character Make Directory Does Not Exist");
     }
