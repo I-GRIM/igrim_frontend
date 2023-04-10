@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:igrim/models/character_model.dart';
 import 'package:igrim/screens/drawing_screen.dart';
-import 'package:igrim/screens/story_make_screen.dart';
 import 'package:igrim/services/device_service.dart';
 import 'dart:developer' as developer;
 
@@ -33,58 +32,81 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
       appBar: AppBar(
         title: const Text("캐릭터 생성"),
       ),
-      body: Column(
-        children: [
-          FutureBuilder(
-            future: characters,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                developer.log("update future builder ${snapshot.data}",
-                    name: "CharacterMakeScreen");
-                return Expanded(
-                  child: makeList(snapshot),
+      body: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            FutureBuilder(
+              future: characters,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  developer.log("update future builder ${snapshot.data}",
+                      name: "CharacterMakeScreen");
+                  return Expanded(
+                    child: makeList(snapshot),
+                  );
+                }
+                return const Center(
+                  child: CircularProgressIndicator(),
                 );
-              }
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            },
-          ),
-          Center(
-            child: Row(
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('뒤로가기'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const DrawingScreen()),
-                    ).then((value) => setState(() {
-                          characters = DeviceService.getCharacters();
-                        }));
-                  },
-                  child: const Text('새로운 캐릭터 만들기'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const StoryMakeScreen()),
-                    );
-                  },
-                  child: const Text('스토리 작성'),
-                ),
-              ],
+              },
             ),
-          ),
-        ],
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('뒤로가기'),
+                  ),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const DrawingScreen()),
+                      ).then((value) => setState(() {
+                            characters = DeviceService.getCharacters();
+                          }));
+                    },
+                    child: const Text('새로운 캐릭터 만들기'),
+                  ),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      var characterList = await characters;
+                      // CharacterService.makeNewCharacters(MakeNewCharacterReqDto("title", ))
+                      //     .then((response) => {
+                      //           if (response.code == 200)
+                      //             {
+                      //               Navigator.push(
+                      //                 context,
+                      //                 MaterialPageRoute(
+                      //                     builder: (context) =>
+                      //                         const StoryMakeScreen()),
+                      //               )
+                      //             }
+                      //           else
+                      //             {
+                      //               //makeNewCharacters fail
+                      //               response.message
+                      //             }
+                      //         });
+                    },
+                    child: const Text('스토리 작성'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -128,8 +150,8 @@ class CharacterWidget extends StatelessWidget {
       children: [
         Image.file(
           image,
-          width: 100,
-          height: 100,
+          width: 300,
+          height: 300,
         ),
         Text(
           name,

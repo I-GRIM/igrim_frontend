@@ -43,6 +43,7 @@ dependencies:
   uuid: ^3.0.4
   flutter_image_compress: ^1.0.0-nullsafety
   path_provider: ^2.0.2
+  flutter_secure_storage: ^8.0.0
 
 
 dev_dependencies:
@@ -71,6 +72,7 @@ flutter:
   assets:
     - assets/svgs/
     - assets/imgs/add_character.png
+    - assets/imgs/logo.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

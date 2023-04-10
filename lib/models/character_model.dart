@@ -13,6 +13,8 @@ class CharacterModel {
       : name = json['name'],
         id = json['id'],
         image = img;
+  
+  
 
   Map<String, dynamic> toMap() {
     return {

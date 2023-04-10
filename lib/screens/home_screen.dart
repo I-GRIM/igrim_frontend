@@ -5,21 +5,34 @@ import 'dart:developer' as developer;
 
 import 'package:igrim/widgets/story_widget.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+Future<List<StoryModel>> dummy() async {
+  List<StoryModel> storyList = [];
+  for (int i = 0; i < 20; i++) {
+    storyList.add(StoryModel(
+        author: "원동연 어린이",
+        thumb: Image.asset("assets/imgs/logo.jpg"),
+        title: "삼맨동연"));
+  }
+  Future.delayed(const Duration(seconds: 3));
+  return storyList;
+}
 
+class HomeScreen extends StatelessWidget {
+  HomeScreen({super.key});
+
+  final Future<List<StoryModel>> storyList = dummy();
   @override
   Widget build(BuildContext context) {
-    developer.log("Build HomeScreen", name: "HomeScreeb");
+    developer.log("Build HomeScreen", name: "HomeScreen");
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
         elevation: 2,
         backgroundColor: Colors.white,
-        foregroundColor: Colors.green,
+        foregroundColor: Colors.blue,
         title: const Text(
-          "아이그림",
+          "책그림",
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
@@ -27,26 +40,23 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // 동화 리스트 빌더
-          // FutureBuilder(
-          //   future: webtoons,
-          //   builder: (context, snapshot) {
-          //     if (snapshot.hasData) {
-          //       return Column(children: [
-          //         const SizedBox(
-          //           height: 50,
-          //         ),
-          //         Expanded(
-          //           child: makeList(snapshot),
-          //         ),
-          //       ]);
-          //     }
-          //     return const Center(
-          //       child: CircularProgressIndicator(),
-          //     );
-          //   },
-          // ),
+          FutureBuilder(
+            future: storyList,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Expanded(
+                  child: makeList(snapshot),
+                );
+              }
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            },
+          ),
+
           ElevatedButton(
             onPressed: () {
               Navigator.push(

@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:igrim/dtos/login_req_dto.dart';
+import 'package:igrim/exceptions/base_exception.dart';
 import 'package:igrim/screens/home_screen.dart';
+import 'package:igrim/services/auth_service.dart';
+import 'dart:developer' as developer;
+
+import 'package:igrim/services/jwt_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,6 +15,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  String errorMessage = "";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,45 +30,61 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(top: 60.0),
+              padding: const EdgeInsets.symmetric(vertical: 30.0),
               child: Center(
-                child: SizedBox(
-                    width: 200,
-                    height: 150,
-                    /*decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(50.0)),*/
-                    child: Image.asset('asset/images/flutter-logo.png')),
+                child: Column(
+                  children: [
+                    SizedBox(
+                        width: 200,
+                        height: 150,
+                        /*decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(50.0)),*/
+                        child: Image.asset('assets/imgs/logo.jpg')),
+                  ],
+                ),
               ),
             ),
-            const Padding(
+            Padding(
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
-              padding: EdgeInsets.symmetric(horizontal: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
-                decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Email',
-                    hintText: 'Enter valid email id as abc@gmail.com'),
+                controller: emailController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: '이메일',
+                ),
               ),
             ),
-            const Padding(
-              padding:
-                  EdgeInsets.only(left: 15.0, right: 15.0, top: 15, bottom: 0),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 15.0, right: 15.0, top: 15, bottom: 0),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
+                controller: passwordController,
                 obscureText: true,
-                decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Password',
-                    hintText: 'Enter secure password'),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: '비밀번호',
+                ),
               ),
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              margin: const EdgeInsets.only(left: 15, top: 5),
+              child: Text(errorMessage,
+                  textAlign: TextAlign.left,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.red,
+                  )),
             ),
             TextButton(
               onPressed: () {
                 //TODO FORGOT PASSWORD SCREEN GOES HERE
               },
               child: const Text(
-                'Forgot Password',
+                '비밀번호 찾기',
                 style: TextStyle(color: Colors.blue, fontSize: 15),
               ),
             ),
@@ -68,12 +94,36 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: BoxDecoration(
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: TextButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => const HomeScreen()));
+                onPressed: () async {
+                  developer.log(
+                      "email : ${emailController.text}, password : ${passwordController.text}",
+                      name: "LoginScreen");
+                  try {
+                    await AuthService.userLogin(LoginReqDto(
+                      emailController.text,
+                      passwordController.text,
+                      "kenny",
+                    )).then((loginResDto) => {
+                          JwtService.storeJwt(loginResDto).then((value) => {
+                                if (value)
+                                  {
+                                    developer.log("finished"),
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => HomeScreen()))
+                                  }
+                              })
+                        });
+                  } on BaseException catch (e) {
+                    developer.log(e.msg, name: "LoginScreen");
+                    setState(() {
+                      errorMessage = e.msg;
+                    });
+                  }
                 },
                 child: const Text(
-                  'Login',
+                  '로그인',
                   style: TextStyle(color: Colors.white, fontSize: 25),
                 ),
               ),
@@ -81,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(
               height: 130,
             ),
-            const Text('New User? Create Account')
+            const Text('회원가입')
           ],
         ),
       ),
