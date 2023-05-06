@@ -1,18 +1,17 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:igrim/dtos/base_header.dart';
 import 'package:igrim/dtos/login_req_dto.dart';
 import 'package:igrim/dtos/login_res_dto.dart';
 import 'package:igrim/exceptions/base_exception.dart';
 import 'package:igrim/exceptions/error_code.dart';
-
+import 'package:igrim/api_keys.dart';
 import 'package:igrim/models/story_model.dart';
 import 'dart:developer' as developer;
 
 class AuthService {
   // 요청 url
-  static const String baseURL = "http://52.79.134.7:8080/api/auth";
+  static const String baseURL = "http://$BACKEND_URL/api/auth";
 
   static Future<LoginResDto> userLogin(LoginReqDto loginReqDto) async {
     //api
@@ -20,7 +19,9 @@ class AuthService {
     developer.log("$url", name: "LoginAPI");
     final response = await http.post(
       url,
-      headers: BaseHeader().toJson(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: loginReqDto.toJson(),
     );
     developer.log(response.body, name: "AuthService");

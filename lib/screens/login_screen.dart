@@ -6,6 +6,7 @@ import 'package:igrim/services/auth_service.dart';
 import 'dart:developer' as developer;
 
 import 'package:igrim/services/jwt_service.dart';
+import 'package:igrim/widgets/loading_widget.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -98,12 +99,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   developer.log(
                       "email : ${emailController.text}, password : ${passwordController.text}",
                       name: "LoginScreen");
+                  showDialog(
+                      // The user CANNOT close this dialog  by pressing outsite it
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (_) {
+                        return const LoadingWidget(text: "로그인 중...");
+                      });
                   try {
                     await AuthService.userLogin(LoginReqDto(
                       emailController.text,
                       passwordController.text,
                       "kenny",
                     )).then((loginResDto) => {
+                          Navigator.of(context).pop(),
                           JwtService.storeJwt(loginResDto).then((value) => {
                                 if (value)
                                   {
@@ -116,6 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               })
                         });
                   } on BaseException catch (e) {
+                    Navigator.of(context).pop();
                     developer.log(e.msg, name: "LoginScreen");
                     setState(() {
                       errorMessage = e.msg;

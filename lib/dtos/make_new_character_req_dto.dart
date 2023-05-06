@@ -1,13 +1,15 @@
 import 'dart:convert';
 
 class MakeNewCharacterReqDto {
-  String title;
-  List<String> names;
-
-  MakeNewCharacterReqDto(this.title, this.names);
+  String name;
+  MakeNewCharacterReqDto(this.name);
 
   String toJson() => json.encode({
-        'title': title,
-        'names': names,
+        'name': name,
       });
+
+  @override
+  String toString() {
+    return "{'name' : $this.name}";
+  }
 }

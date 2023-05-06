@@ -1,8 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart' hide Image;
+import 'package:igrim/dtos/make_new_character_req_dto.dart';
+import 'package:igrim/dtos/make_new_character_res_dto.dart';
 import 'package:igrim/models/drawing_mode.dart';
 import 'package:igrim/models/sketch.dart';
+import 'package:igrim/services/character_service.dart';
 import 'package:igrim/services/device_service.dart';
 import 'package:igrim/widgets/canvas_side_bar.dart';
 import 'package:igrim/services/drawing_service.dart';
@@ -10,6 +13,7 @@ import 'package:igrim/main.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:igrim/widgets/loading_widget.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:developer' as developer;
 
 class DrawingScreen extends HookWidget {
   const DrawingScreen({Key? key}) : super(key: key);
@@ -33,13 +37,7 @@ class DrawingScreen extends HookWidget {
       initialValue: 1,
     );
 
-    void onPressConfirm(name, bytes, extension) {
-      String id = const Uuid().v4();
-      DeviceService().saveCharacterFile(bytes, extension, id, name).then((id) {
-        Navigator.of(context).pop(); //pop 저장중
-        Navigator.of(context).pop(); //pop drawing screen
-      });
-
+    void onPressConfirm(name, bytes, extension) async {
       showDialog(
           // The user CANNOT close this dialog  by pressing outsite it
           barrierDismissible: false,
@@ -47,6 +45,19 @@ class DrawingScreen extends HookWidget {
           builder: (_) {
             return const LoadingWidget(text: "저장중");
           });
+
+      String id = const Uuid().v4();
+      developer.log(id, name: "StoryNewTitleScreen");
+      await DeviceService.saveCharacterFile(bytes, extension, id, name);
+      String path = await DeviceService.getStoryMakingDirectory();
+      developer.log(path, name: "StoryNewTitleScreen");
+      MakeNewCharacterResDto makeNewCharacterResDto =
+          await CharacterService.makeNewCharacter(
+        MakeNewCharacterReqDto(name),
+        "$path/characters/$id/img.jpeg",
+      );
+      Navigator.of(context).pop(); //pop 저장중
+      Navigator.of(context).pop(); //pop drawing screen
     }
 
     void onSaveCharacter(name, bytes, extension) async {
@@ -73,6 +84,7 @@ class DrawingScreen extends HookWidget {
                       child: const Text('확인'),
                       onPressed: () {
                         if (textController.text == "") {
+                          developer.log("empty text", name: "DrawingScreen");
                         } else {
                           name = textController.text;
                           onPressConfirm(name, bytes, extension);

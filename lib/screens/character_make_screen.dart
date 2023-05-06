@@ -3,11 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:igrim/models/character_model.dart';
 import 'package:igrim/screens/drawing_screen.dart';
+import 'package:igrim/screens/story_make_screen.dart';
 import 'package:igrim/services/device_service.dart';
 import 'dart:developer' as developer;
 
 class CharacterMakeScreen extends StatefulWidget {
-  const CharacterMakeScreen({super.key});
+  final String storyId;
+
+  const CharacterMakeScreen(this.storyId, {super.key});
 
   @override
   State<CharacterMakeScreen> createState() => _CharacterMakeScreenState();
@@ -15,17 +18,7 @@ class CharacterMakeScreen extends StatefulWidget {
 
 class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
   final storyMakingPath = DeviceService.makeStoryMakingDirectory();
-  late Future<List<CharacterModel>> characters;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    setState(() {
-      characters = DeviceService.getCharacters();
-    });
-  }
-
+  late Future<List<CharacterModel>> characters = DeviceService.getCharacters();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,20 +30,22 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
         child: Column(
           children: [
             FutureBuilder(
-              future: characters,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  developer.log("update future builder ${snapshot.data}",
-                      name: "CharacterMakeScreen");
-                  return Expanded(
-                    child: makeList(snapshot),
-                  );
-                }
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              },
-            ),
+                future: DeviceService.getCharacters(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (snapshot.hasError) {
+                    return const Text("error");
+                  } else {
+                    developer.log("update future builder ${snapshot.data}",
+                        name: "CharacterMakeScreen");
+                    return Expanded(
+                      child: makeList(snapshot),
+                    );
+                  }
+                }),
             Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -70,9 +65,11 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => const DrawingScreen()),
-                      ).then((value) => setState(() {
-                            characters = DeviceService.getCharacters();
-                          }));
+                      ).then((value) async => {
+                            setState(
+                              () {},
+                            )
+                          });
                     },
                     child: const Text('새로운 캐릭터 만들기'),
                   ),
@@ -81,24 +78,12 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      var characterList = await characters;
-                      // CharacterService.makeNewCharacters(MakeNewCharacterReqDto("title", ))
-                      //     .then((response) => {
-                      //           if (response.code == 200)
-                      //             {
-                      //               Navigator.push(
-                      //                 context,
-                      //                 MaterialPageRoute(
-                      //                     builder: (context) =>
-                      //                         const StoryMakeScreen()),
-                      //               )
-                      //             }
-                      //           else
-                      //             {
-                      //               //makeNewCharacters fail
-                      //               response.message
-                      //             }
-                      //         });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                StoryMakeScreen(widget.storyId)),
+                      );
                     },
                     child: const Text('스토리 작성'),
                   ),

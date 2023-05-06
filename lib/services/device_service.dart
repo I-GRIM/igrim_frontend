@@ -19,19 +19,22 @@ class DeviceService {
 
   static Future<String> getStoryMakingDirectory() async {
     final directory = await getApplicationDocumentsDirectory();
+    developer.log(directory.list().toList().toString(), name: "DeviceService");
     return directory.path;
   }
 
   static Future<String> makeStoryMakingDirectory() async {
     ///
-    final directory = Directory("${await getStoryMakingDirectory()}/charcters");
+    final directory =
+        Directory("${await getStoryMakingDirectory()}/characters");
     directory.create(); //create directory if doesn't exits
     return directory.path;
   }
 
   //static Future<bool> deleteStoryMakingDirectory() async {}
   static Future<List<CharacterModel>> getCharacters() async {
-    final directory = Directory("${await getStoryMakingDirectory()}/charcters");
+    final directory =
+        Directory("${await getStoryMakingDirectory()}/characters");
     List<CharacterModel> characters = [];
 
     try {
@@ -70,9 +73,10 @@ class DeviceService {
     return characters;
   }
 
-  Future<String> saveCharacterFile(
+  static Future<String> saveCharacterFile(
       Uint8List bytes, String extension, String id, String name) async {
-    final directory = Directory("${await getStoryMakingDirectory()}/charcters");
+    final directory =
+        Directory("${await getStoryMakingDirectory()}/characters");
 
     if (await directory.exists()) {
       final compressedBytes = await FlutterImageCompress.compressWithList(

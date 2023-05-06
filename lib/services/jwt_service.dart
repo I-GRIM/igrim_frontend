@@ -4,11 +4,10 @@ import 'dart:developer' as developer;
 import 'package:igrim/dtos/login_res_dto.dart';
 
 class JwtService {
-  static Future<String> getJwt() async {
+  static Future<String?> getJwt() async {
     const storage = FlutterSecureStorage();
-    storage.read(key: "jwt");
-
-    return "jwt";
+    developer.log('${storage.read(key: "accesToken")}', name: "JwtService");
+    return storage.read(key: "accesToken");
   }
 
   //save jwt token

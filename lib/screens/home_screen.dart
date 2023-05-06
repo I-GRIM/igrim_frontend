@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:igrim/models/story_model.dart';
 import 'package:igrim/screens/character_make_screen.dart';
+import 'package:igrim/screens/story_new_title_screen.dart';
 import 'dart:developer' as developer;
 
 import 'package:igrim/widgets/story_widget.dart';
@@ -62,7 +63,7 @@ class HomeScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const CharacterMakeScreen()),
+                    builder: (context) => const StoryNewTitleScreen()),
               );
             },
             child: const Text(
