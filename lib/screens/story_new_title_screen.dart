@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:igrim/dtos/story_create_req_dto.dart';
 import 'package:igrim/screens/character_make_screen.dart';
+import 'package:igrim/services/device_service.dart';
 import 'dart:developer' as developer;
 
 import 'package:igrim/services/story_service.dart';
@@ -38,6 +39,7 @@ class _StoryNewTitleScreenState extends State<StoryNewTitleScreen> {
           ElevatedButton(
             onPressed: () {
               if (titleController.text != '') {
+                DeviceService.clean();
                 StoryService.createStory(
                         StoryCreateReqDto(titleController.text))
                     .then((value) => {

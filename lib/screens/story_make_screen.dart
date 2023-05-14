@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:igrim/dtos/page_create_req_dto.dart';
+import 'package:igrim/models/character_model.dart';
+import 'package:igrim/services/device_service.dart';
 import 'package:igrim/services/open_api_service.dart';
 import 'package:igrim/services/story_service.dart';
 import 'dart:developer' as developer;
-
 import 'package:igrim/widgets/loading_widget.dart';
 
 class StoryMakeScreen extends StatefulWidget {
@@ -17,8 +18,33 @@ class StoryMakeScreen extends StatefulWidget {
 class _StoryMakeScreenState extends State<StoryMakeScreen> {
   List<String> story = [];
   int currentPage = 0;
+  final String defaultUrl =
+      "https://liftlearning.com/wp-content/uploads/2020/09/default-image.png";
   String url =
       "https://liftlearning.com/wp-content/uploads/2020/09/default-image.png";
+  List<Widget> charactersInImage = [
+    Image.network(
+      "https://liftlearning.com/wp-content/uploads/2020/09/default-image.png",
+      width: 800,
+      height: 800,
+      loadingBuilder: (BuildContext context, Widget child,
+          ImageChunkEvent? loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        }
+        return Center(
+          child: CircularProgressIndicator(
+            value: loadingProgress.expectedTotalBytes != null
+                ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                : null,
+          ),
+        );
+      },
+    ),
+  ];
+  Future<List<CharacterModel>> characters = DeviceService.getCharacters();
+
   TextEditingController textEditingController = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -26,37 +52,47 @@ class _StoryMakeScreenState extends State<StoryMakeScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text("이야기 작성"),
+        title: Text(
+          "장면 ${currentPage + 1}",
+          style: const TextStyle(fontSize: 24),
+        ),
       ),
       body: Container(
         margin: const EdgeInsets.all(10),
         child: Column(
           children: [
-            const SizedBox(height: 20),
-            Text(
-              "장면 ${currentPage + 1}",
-              style: const TextStyle(fontSize: 24),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(flex: 2, child: Stack(children: charactersInImage)),
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      children: [
+                        FutureBuilder(
+                            future: DeviceService.getCharacters(),
+                            builder: ((context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              } else if (snapshot.hasError) {
+                                return const Text("error");
+                              } else {
+                                return Expanded(
+                                  child: makeList(snapshot),
+                                );
+                              }
+                            })),
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            Expanded(
-                child: Image.network(
-              url,
-              loadingBuilder: (BuildContext context, Widget child,
-                  ImageChunkEvent? loadingProgress) {
-                if (loadingProgress == null) {
-                  return child;
-                }
-                return Center(
-                  child: CircularProgressIndicator(
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                            loadingProgress.expectedTotalBytes!
-                        : null,
-                  ),
-                );
-              },
-            )),
-            Expanded(
+            SizedBox(
+              height: 100,
               child: TextField(
                 controller: textEditingController,
                 keyboardType: TextInputType.multiline,
@@ -146,7 +182,9 @@ class _StoryMakeScreenState extends State<StoryMakeScreen> {
                       ).then((value) => {
                             Navigator.of(context).pop(),
                             textEditingController.clear(),
-                            currentPage++
+                            currentPage++,
+                            url = defaultUrl,
+                            setState(() {}),
                           });
                     }
                   },
@@ -167,6 +205,8 @@ class _StoryMakeScreenState extends State<StoryMakeScreen> {
                         );
                       },
                     );
+                    //AI API 연결
+                    //API.then 해서 끝날 떄 까지 배경 사진 iterate
                   },
                   child: const Text(
                     '동화 생성',
@@ -177,6 +217,45 @@ class _StoryMakeScreenState extends State<StoryMakeScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  ListView makeList(AsyncSnapshot<List<CharacterModel>> snapshot) {
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      itemBuilder: (BuildContext context, int index) {
+        var character = snapshot.data![index];
+        double x = 0;
+        double y = 0;
+        return Draggable(
+          feedback: Image.file(
+            character.image,
+            width: 100,
+            height: 100,
+          ),
+          child: Image.file(character.image),
+          onDragEnd: (dragDetails) {
+            x = dragDetails.offset.dx;
+            y = dragDetails.offset.dy;
+            setState(() {
+              charactersInImage.add(Positioned(
+                top: y,
+                left: x,
+                child: Image.file(
+                  character.image,
+                  height: 100,
+                  width: 100,
+                ),
+              ));
+            });
+          },
+        );
+      },
+      separatorBuilder: (BuildContext context, int index) => const SizedBox(
+        width: 40,
+      ),
+      itemCount: snapshot.data!.length,
     );
   }
 }

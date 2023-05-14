@@ -18,7 +18,7 @@ class CharacterMakeScreen extends StatefulWidget {
 
 class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
   final storyMakingPath = DeviceService.makeStoryMakingDirectory();
-  late Future<List<CharacterModel>> characters = DeviceService.getCharacters();
+  Future<List<CharacterModel>> characters = DeviceService.getCharacters();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,9 +52,11 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      setState(() {
+                        characters = DeviceService.getCharacters();
+                      });
                     },
-                    child: const Text('뒤로가기'),
+                    child: const Text('새로고침'),
                   ),
                   const SizedBox(
                     width: 20,
@@ -67,7 +69,9 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
                             builder: (context) => const DrawingScreen()),
                       ).then((value) async => {
                             setState(
-                              () {},
+                              () {
+                                characters = DeviceService.getCharacters();
+                              },
                             )
                           });
                     },

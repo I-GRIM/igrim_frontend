@@ -1,15 +1,14 @@
-import 'dart:io';
+import 'dart:convert';
 
-import 'package:http/http.dart' as http;
 import 'package:igrim/dtos/make_new_character_req_dto.dart';
 import 'package:igrim/dtos/make_new_character_res_dto.dart';
+import 'package:igrim/api_keys.dart';
 import 'package:igrim/exceptions/base_exception.dart';
 import 'package:igrim/exceptions/error_code.dart';
+import 'package:http/http.dart' as http;
+import 'dart:developer' as developer;
 import 'package:http_parser/http_parser.dart';
 import 'package:igrim/services/jwt_service.dart';
-import 'package:path/path.dart';
-import 'dart:developer' as developer;
-import 'package:igrim/api_keys.dart';
 
 class CharacterService {
   // 요청 url
@@ -17,28 +16,35 @@ class CharacterService {
   // 추천수 순 동화 받아오기
 
   static Future<MakeNewCharacterResDto> makeNewCharacter(
-      MakeNewCharacterReqDto makeNewCharacterReqDto, String imagePath) async {
-    final url = Uri.parse(baseURL);
-    var request = http.MultipartRequest('POST', url)
-      ..fields['value'] = makeNewCharacterReqDto.toString()
-      ..headers['Authorization'] = 'Bearer ${await JwtService.getJwt()}'
-      ..headers['Content-Type'] = "multipart/form-data";
-    developer.log(request.toString(), name: "CharacterService");
+    MakeNewCharacterReqDto makeNewCharacterReqDto,
+    String imagePath,
+  ) async {
+    var headers = {'Authorization': 'Bearer ${await JwtService.getJwt()}'};
+    var request = http.MultipartRequest(
+        'POST', Uri.parse('http://52.79.134.7:8080/api/character'));
+    //request.fields.addAll({'value': '{"name" : "${makeNewCharacterReqDto.name}"}'});
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'value',
+        utf8.encode(json.encode({"name": makeNewCharacterReqDto.name})),
+        contentType: MediaType(
+          'application',
+          'json',
+          {'charset': 'utf-8'},
+        ),
+      ),
+    );
+    request.files.add(await http.MultipartFile.fromPath('charac', imagePath));
+    request.headers.addAll(headers);
 
-    File image = File(imagePath);
-    request.files.add(http.MultipartFile(
-        'charac', image.readAsBytes().asStream(), image.lengthSync(),
-        filename: basename(image.path),
-        contentType: MediaType('multipart', 'form-data')));
-    var response = await request.send(); //
-    var responsed = await http.Response.fromStream(response);
+    http.StreamedResponse response = await request.send();
 
-    if (response.statusCode == 200) {
-      developer.log(responsed.body.toString(), name: "CharacterService");
-      return MakeNewCharacterResDto(responsed.body);
+    if (response.statusCode == 201) {
+      developer.log(response.toString());
+      return MakeNewCharacterResDto(response.stream.toString());
     } else {
-      developer.log(responsed.body.toString(), name: "CharacterService");
-      throw BaseException(ErrorCode.NEED_SIGN_IN, "에러 메세지");
+      developer.log(await response.stream.bytesToString());
+      throw BaseException(ErrorCode.NEED_SIGN_IN, "오류");
     }
   }
 }

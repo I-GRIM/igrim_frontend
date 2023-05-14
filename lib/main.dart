@@ -6,6 +6,7 @@ void main() {
   runApp(const App());
 }
 
+late String path;
 const Color kCanvasColor = Color(0xfff2f3f7);
 
 class App extends StatelessWidget {

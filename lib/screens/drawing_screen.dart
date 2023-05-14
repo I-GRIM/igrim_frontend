@@ -47,17 +47,22 @@ class DrawingScreen extends HookWidget {
           });
 
       String id = const Uuid().v4();
-      developer.log(id, name: "StoryNewTitleScreen");
       await DeviceService.saveCharacterFile(bytes, extension, id, name);
       String path = await DeviceService.getStoryMakingDirectory();
-      developer.log(path, name: "StoryNewTitleScreen");
       MakeNewCharacterResDto makeNewCharacterResDto =
           await CharacterService.makeNewCharacter(
-        MakeNewCharacterReqDto(name),
-        "$path/characters/$id/img.jpeg",
-      );
-      Navigator.of(context).pop(); //pop 저장중
-      Navigator.of(context).pop(); //pop drawing screen
+              MakeNewCharacterReqDto(name), "$path/characters/$id/img.jpeg");
+      developer.log("start makeNewCharacterApi Done", name: "99kenny");
+
+      //test시에는 임의로 이미지 url사용 TODO
+      //String imgUrl = makeNewCharacterResDto.imgUrl;
+      String imgUrl = "https://cdn.media.amplience.net/s/hottopic/10529309_hi";
+
+      // 이미지 url로 이미지 다운로드 후 이미지 교체
+      await DeviceService.changeImageFile(imgUrl, id, name).then((value) => {
+            Navigator.of(context).pop(), //pop 저장중
+            Navigator.of(context).pop(), //pop drawing screen
+          });
     }
 
     void onSaveCharacter(name, bytes, extension) async {

@@ -6,11 +6,12 @@ import 'package:igrim/models/character_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:developer' as developer;
+import 'package:http/http.dart' as http;
 
 class DeviceService {
   static void clean() async {
     final bdirectory =
-        Directory("${await getStoryMakingDirectory()}/charcters");
+        Directory("${await getStoryMakingDirectory()}/characters");
     if (await bdirectory.exists()) {
       bdirectory.delete(recursive: true);
       developer.log("StoryMakingDirectoryDeleted", name: "DeviceService");
@@ -24,7 +25,6 @@ class DeviceService {
   }
 
   static Future<String> makeStoryMakingDirectory() async {
-    ///
     final directory =
         Directory("${await getStoryMakingDirectory()}/characters");
     directory.create(); //create directory if doesn't exits
@@ -98,6 +98,28 @@ class DeviceService {
       // Write the compressed bytes to the temporary file
       await jpgFile.writeAsBytes(compressedBytes);
       await infoFile.writeAsString(jsonStr);
+    } else {
+      throw Exception("Character Make Directory Does Not Exist");
+    }
+
+    return id;
+  }
+
+  static Future<String> changeImageFile(
+      String imgUrl, String id, String name) async {
+    final directory =
+        Directory("${await getStoryMakingDirectory()}/characters");
+
+    if (await directory.exists()) {
+      final characterDirectory = Directory("${directory.path}/$id");
+      final http.Response response = await http.get(Uri.parse(imgUrl));
+      developer.log(response.body, name: "imgurl");
+      if (await characterDirectory.exists()) {
+        final jpgFile = File('${directory.path}/$id/img.jpeg');
+        jpgFile.delete();
+        await jpgFile.writeAsBytes(response.bodyBytes);
+        developer.log(jpgFile.toString(), name: "jpgFile");
+      }
     } else {
       throw Exception("Character Make Directory Does Not Exist");
     }
