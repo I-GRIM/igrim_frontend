@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:igrim/screens/login_screen.dart';
+import 'package:igrim/screens/story_make_screen.dart';
 import 'package:igrim/services/device_service.dart';
 
 void main() {
@@ -19,7 +19,7 @@ class App extends StatelessWidget {
       title: '책그림',
       theme: ThemeData(primarySwatch: Colors.blue),
       debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+      home: const StoryMakeScreen("asd"),
     );
   }
 }

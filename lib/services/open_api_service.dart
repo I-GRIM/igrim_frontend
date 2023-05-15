@@ -7,19 +7,19 @@ import 'package:igrim/exceptions/base_exception.dart';
 import 'package:igrim/exceptions/error_code.dart';
 import 'dart:developer' as developer;
 
-void main(List<String> args) async {
-  // OpenAI.apiKey = GPT_API_KEY;
-  // OpenAIImageVariationModel imageVariation =
-  //     await OpenAI.instance.image.variation(
-  //   image: File("C:/Users/99san/Desktop/KakaoTalk_20230503_202308084.png"),
-  //   n: 1,
-  //   size: OpenAIImageSize.size1024,
-  //   responseFormat: OpenAIImageResponseFormat.url,
-  // );
-// print(imageVariation.data);
-  OpenApiService.getCharacterPrompt(
-      "옛날 옛날 어느 비가 오는 날 어느 깊은 산골의 한 마을에 동연이가 상윤이에게 괴롭힘을 당하고 있었어요요");
-}
+// void main(List<String> args) async {
+//   // OpenAI.apiKey = GPT_API_KEY;
+//   // OpenAIImageVariationModel imageVariation =
+//   //     await OpenAI.instance.image.variation(
+//   //   image: File("C:/Users/99san/Desktop/KakaoTalk_20230503_202308084.png"),
+//   //   n: 1,
+//   //   size: OpenAIImageSize.size1024,
+//   //   responseFormat: OpenAIImageResponseFormat.url,
+//   // );
+// // print(imageVariation.data);
+//   OpenApiService.getCharacterPrompt(
+//       "옛날 옛날 어느 비가 오는 날 어느 깊은 산골의 한 마을에 동연이가 상윤이에게 괴롭힘을 당하고 있었어요요");
+// }
 
 class OpenApiService {
   static String BaseURL = "https://api.openai.com/v1";

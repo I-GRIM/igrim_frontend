@@ -46,6 +46,7 @@ dependencies:
   flutter_secure_storage: ^8.0.0
   dart_openai: ^1.9.6
   dio: ^4.0.0
+  zoom_widget: ^2.0.1
 
 dev_dependencies:
   flutter_test:
