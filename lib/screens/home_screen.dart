@@ -85,7 +85,7 @@ class HomeScreen extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         var story = snapshot.data![index];
         return StoryWidget(
-            title: story.title, author: story.author, thumb: story.thumb);
+            storyId : "storyId",title: story.title, author: story.author, thumb: story.thumb);
       },
       separatorBuilder: (BuildContext context, int index) => const SizedBox(
         width: 40,

@@ -25,10 +25,11 @@ class _StoryMakeScreenState extends State<StoryMakeScreen> {
       "https://liftlearning.com/wp-content/uploads/2020/09/default-image.png";
   Future<List<CharacterModel>> characters = DeviceService.getCharacters();
   TextEditingController textEditingController = TextEditingController();
+  String url =
+      "https://liftlearning.com/wp-content/uploads/2020/09/default-image.png";
 
   @override
   Widget build(BuildContext context) {
-    String url = defaultUrl;
     developer.log("build StoryMakeScreen", name: "StoryMakeScreen");
     return Scaffold(
         resizeToAvoidBottomInset: false,
@@ -43,7 +44,25 @@ class _StoryMakeScreenState extends State<StoryMakeScreen> {
             child: Column(
               children: [
                 Stack(children: [
-                  Image.network(defaultUrl),
+                  Image.network(
+                    url,
+                    height: 420,
+                    width: 420,
+                    loadingBuilder: (BuildContext context, Widget child,
+                        ImageChunkEvent? loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      }
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      );
+                    },
+                  ),
                   ResizableImage(image: characterUrl),
                 ]),
                 const SizedBox(
@@ -106,7 +125,7 @@ class _StoryMakeScreenState extends State<StoryMakeScreen> {
                         }
 
                         parsedResponse[0].split(":")[0];
-
+                        // TODO : createPage api에 캐릭터 좌표도 필요
                         StoryService.createPage(
                           widget.storyId,
                           PageCreateReqDto(textEditingController.text,

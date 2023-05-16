@@ -47,6 +47,7 @@ dependencies:
   dart_openai: ^1.9.6
   dio: ^4.0.0
   zoom_widget: ^2.0.1
+  page_flip: ^0.0.3
 
 dev_dependencies:
   flutter_test:
