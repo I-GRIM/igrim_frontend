@@ -76,6 +76,12 @@ flutter:
     - assets/svgs/
     - assets/imgs/add_character.png
     - assets/imgs/logo.jpg
+    - assets/imgs/story_viewer_background.jpg
+  fonts:
+    - family: GamjaFlower
+      fonts:
+        - asset: assets/font/GamjaFlower-Regular.ttf
+        - asset: assets/font/Cafe24Ssurround.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

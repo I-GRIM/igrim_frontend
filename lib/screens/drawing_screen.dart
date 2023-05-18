@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart' hide Image;
 import 'package:igrim/dtos/make_new_character_req_dto.dart';
 import 'package:igrim/dtos/make_new_character_res_dto.dart';
+import 'package:igrim/exceptions/base_exception.dart';
 import 'package:igrim/models/drawing_mode.dart';
 import 'package:igrim/models/sketch.dart';
 import 'package:igrim/services/character_service.dart';
@@ -38,31 +39,33 @@ class DrawingScreen extends HookWidget {
     );
 
     void onPressConfirm(name, bytes, extension) async {
-      showDialog(
-          // The user CANNOT close this dialog  by pressing outsite it
-          barrierDismissible: false,
-          context: context,
-          builder: (_) {
-            return const LoadingWidget(text: "저장중");
-          });
-
-      String id = const Uuid().v4();
-      await DeviceService.saveCharacterFile(bytes, extension, id, name);
-      String path = await DeviceService.getStoryMakingDirectory();
-      MakeNewCharacterResDto makeNewCharacterResDto =
-          await CharacterService.makeNewCharacter(
-              MakeNewCharacterReqDto(name), "$path/characters/$id/img.jpeg");
-      developer.log("start makeNewCharacterApi Done", name: "99kenny");
-
-      //test시에는 임의로 이미지 url사용 TODO
-      //String imgUrl = makeNewCharacterResDto.imgUrl;
-      String imgUrl = "https://cdn.media.amplience.net/s/hottopic/10529309_hi";
-
-      // 이미지 url로 이미지 다운로드 후 이미지 교체
-      await DeviceService.changeImageFile(imgUrl, id, name).then((value) => {
-            Navigator.of(context).pop(), //pop 저장중
-            Navigator.of(context).pop(), //pop drawing screen
-          });
+      try {
+        String id = const Uuid().v4();
+        await DeviceService.saveCharacterFile(bytes, extension, id, name);
+        String path = await DeviceService.getStoryMakingDirectory();
+        MakeNewCharacterResDto makeNewCharacterResDto =
+            await CharacterService.makeNewCharacter(
+                MakeNewCharacterReqDto(name), "$path/characters/$id/img.jpeg");
+        developer.log("start makeNewCharacterApi Done", name: "99kenny");
+        developer.log(makeNewCharacterResDto.toString(),
+            name: "makeNewcharacterResDto");
+        String imgUrl = makeNewCharacterResDto.imgUrl;
+        developer.log(imgUrl);
+        // 이미지 url로 이미지 다운로드 후 이미지 교체
+        await DeviceService.changeImageFile(imgUrl, id, name).then((value) => {
+              Navigator.of(context).pop(), //pop 저장중
+              Navigator.of(context).pop(), //pop drawing screen
+              Navigator.of(context).pop(), //pop 캐릭터를 입력해주세요
+            });
+      } on BaseException catch (e) {
+        Navigator.of(context).pop(); //pop 저장중
+        Navigator.of(context).pop(); //pop drawing screen
+        Navigator.of(context).pop(); //po
+        developer.log(e.toString(), name: "error");
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("cannot upload characters from device..."),
+        ));
+      }
     }
 
     void onSaveCharacter(name, bytes, extension) async {
@@ -92,8 +95,14 @@ class DrawingScreen extends HookWidget {
                           developer.log("empty text", name: "DrawingScreen");
                         } else {
                           name = textController.text;
+                          showDialog(
+                              // The user CANNOT close this dialog  by pressing outsite it
+                              barrierDismissible: false,
+                              context: context,
+                              builder: (_) {
+                                return const LoadingWidget(text: "저장중");
+                              });
                           onPressConfirm(name, bytes, extension);
-                          Navigator.of(context).pop(); //pop 캐릭터 이름을 입력해주세요
                         }
                       },
                     ),

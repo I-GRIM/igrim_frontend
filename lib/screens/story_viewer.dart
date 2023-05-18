@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:page_flip/page_flip.dart';
+import 'package:igrim/dtos/get_story_by_id_res_dto.dart';
+import 'package:igrim/services/story_service.dart';
 
 class StoryViewer extends StatefulWidget {
   final String storyId;
@@ -13,6 +14,8 @@ class StoryViewer extends StatefulWidget {
 class _StoryViewerState extends State<StoryViewer> {
   @override
   Widget build(BuildContext context) {
+    Future<List<GetStoryByIdResDto>> pages =
+        StoryService.getStoryById(widget.storyId);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -20,46 +23,48 @@ class _StoryViewerState extends State<StoryViewer> {
       ),
       body: Container(
         margin: const EdgeInsets.all(10),
-        child: PageFlipWidget(
-            showDragCutoff: false,
-            backgroundColor: Colors.white,
-            children: <Column>[
-              Column(children: [
-                Expanded(
-                  flex: 3,
-                  child: Image.network(
-                    "https://cdn.eyesmag.com/content/uploads/posts/2020/08/11/the-patrick-star-show-spongebob-squarepants-spin-off-1-516d0d4f-fcf0-4106-ab95-a407167fee2c.jpg",
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    width: 1000,
-                    decoration: const BoxDecoration(
-                      
-                        border: Border(
-                            bottom: BorderSide(color: Colors.black),
-                            left: BorderSide(color: Colors.black),
-                            right: BorderSide(color: Colors.black),
-                            top: BorderSide(color: Colors.black))),
-                    child: const Text(
-                      "옛날옛날 눈이 오는 어느 숲속 마을에 한 소녀가 살고 있었어요.",
-                      style: TextStyle(
-                        fontSize: 24,
+        child: FutureBuilder(
+          future: pages,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      height: 1000,
+                      width: 1185,
+                      decoration: const BoxDecoration(
+                          image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image:
+                                  AssetImage("story_viewer_background.jpg"))),
+                      child: Column(
+                        children: [
+                          Image.network(
+                            snapshot.data?[index].imgUrl ?? "deafult",
+                          ),
+                          const SizedBox(height: 10),
+                          Container(
+                            decoration: const BoxDecoration(),
+                            child: Text(
+                              snapshot.data?[index].content ?? "---",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 30,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          )
+                        ],
                       ),
-                    ),
-                  ),
-                ),
-              ]),
-              Column(children: [
-                Image.network(
-                    "https://cdn.edujin.co.kr/news/photo/202102/35063_66368_1421.jpg",
-                    width: 600,
-                    height: 600),
-                const Text("data")
-              ]),
-            ]),
+                    );
+                  });
+            } else {
+              return const CircularProgressIndicator();
+            }
+          },
+        ),
       ),
     );
   }

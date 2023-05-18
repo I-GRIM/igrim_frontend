@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:igrim/screens/story_viewer.dart';
+import 'package:igrim/screens/login_screen.dart';
 import 'package:igrim/services/device_service.dart';
 
 void main() {
@@ -17,12 +17,12 @@ class App extends StatelessWidget {
     DeviceService.clean();
     return MaterialApp(
       title: '책그림',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      debugShowCheckedModeBanner: false,
-      home: const StoryViewer(
-        storyId: "ss",
-        title: "제목",
+      theme: ThemeData(
+        fontFamily: 'Cafe24Ssurround',
+        primarySwatch: Colors.blue,
       ),
+      debugShowCheckedModeBanner: false,
+      home: const LoginScreen(),
     );
   }
 }

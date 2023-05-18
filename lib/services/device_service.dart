@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:igrim/exceptions/base_exception.dart';
+import 'package:igrim/exceptions/error_code.dart';
 import 'package:igrim/models/character_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -68,6 +70,7 @@ class DeviceService {
     } catch (e) {
       //디렉토리 삭제 후 초기화
       print("chcek device_service, 45");
+      throw BaseException(ErrorCode.NEED_SIGN_IN, "Device service error");
     }
 
     return characters;
@@ -99,7 +102,7 @@ class DeviceService {
       await jpgFile.writeAsBytes(compressedBytes);
       await infoFile.writeAsString(jsonStr);
     } else {
-      throw Exception("Character Make Directory Does Not Exist");
+      throw BaseException(ErrorCode.NEED_SIGN_IN,"Character Make Directory Does Not Exist");
     }
 
     return id;
@@ -112,6 +115,7 @@ class DeviceService {
 
     if (await directory.exists()) {
       final characterDirectory = Directory("${directory.path}/$id");
+      //S3 이미지 다운로드
       final http.Response response = await http.get(Uri.parse(imgUrl));
       developer.log(response.body, name: "imgurl");
       if (await characterDirectory.exists()) {
@@ -121,7 +125,8 @@ class DeviceService {
         developer.log(jpgFile.toString(), name: "jpgFile");
       }
     } else {
-      throw Exception("Character Make Directory Does Not Exist");
+      
+      throw BaseException(ErrorCode.NEED_SIGN_IN,"Character Make Directory Does Not Exist");
     }
 
     return id;

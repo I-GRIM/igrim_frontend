@@ -43,51 +43,57 @@ class OpenApiService {
     OpenAI.apiKey = GPT_API_KEY;
     String prompt =
         "Can you describe emotions and behavior of each characters in the following story in this format? {a boy : sad, happy} DON'T INCLUDE ANY OTHER DESCRIPTION and answer in English \n";
+    try {
+      OpenAIChatCompletionModel chatCompletion =
+          await OpenAI.instance.chat.create(
+        model: "gpt-3.5-turbo",
+        messages: [
+          OpenAIChatCompletionChoiceMessageModel(
+            content: prompt + story,
+            role: OpenAIChatMessageRole.user,
+          ),
+        ],
+      );
 
-    OpenAIChatCompletionModel chatCompletion =
-        await OpenAI.instance.chat.create(
-      model: "gpt-3.5-turbo",
-      messages: [
-        OpenAIChatCompletionChoiceMessageModel(
-          content: prompt + story,
-          role: OpenAIChatMessageRole.user,
-        ),
-      ],
-    );
+      String response = chatCompletion.choices[0].message.content;
+      developer.log(response, name: "OpenApi service");
 
-    String response = chatCompletion.choices[0].message.content;
-    developer.log(response, name: "StoryService");
-
-    return response;
+      return response;
+    } on Exception catch (e) {
+      developer.log(e.toString(), name: "OpenApi service");
+      return "Error";
+    }
   }
 
   static Future<String> getKeywords(String story) async {
     OpenAI.apiKey = GPT_API_KEY;
     String prompt =
         "Can you make me a DALL-E prompt for the background scene of the following story in English? Don't include any character related keyword like Boy, girl. I just want to make a background Image. \n $story";
+    try {
+      OpenAIChatCompletionModel chatCompletion =
+          await OpenAI.instance.chat.create(
+        model: "gpt-3.5-turbo",
+        messages: [
+          OpenAIChatCompletionChoiceMessageModel(
+            content: prompt,
+            role: OpenAIChatMessageRole.user,
+          ),
+        ],
+      );
 
-    OpenAIChatCompletionModel chatCompletion =
-        await OpenAI.instance.chat.create(
-      model: "gpt-3.5-turbo",
-      messages: [
-        OpenAIChatCompletionChoiceMessageModel(
-          content: prompt,
-          role: OpenAIChatMessageRole.user,
-        ),
-      ],
-    );
-
-    String response = chatCompletion.choices[0].message.content;
-    developer.log(response, name: "StoryService");
-
-    return response;
+      String response = chatCompletion.choices[0].message.content;
+      developer.log(response, name: "StoryService");
+      return response;
+    } on Exception {
+      return "Error";
+    }
   }
 
   static Future<String> generateImage(String prompt) async {
     OpenAIImageModel image = await OpenAI.instance.image.create(
       prompt: "ghibli style $prompt",
       n: 1,
-      size: OpenAIImageSize.size1024,
+      size: OpenAIImageSize.size512,
       responseFormat: OpenAIImageResponseFormat.url,
     );
     developer.log(image.data[0].toString(), name: "StoryService");

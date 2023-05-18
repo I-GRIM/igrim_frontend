@@ -1,8 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 
 class ResizableImage extends StatefulWidget {
-  final String image;
+  final File image;
   const ResizableImage({
     super.key,
     required this.image,
@@ -35,8 +37,8 @@ class _ResizableImageState extends State<ResizableImage> {
         },
         onDoubleTap: () {
           setState(() {
-            width = 100;
-            height = 100;
+            width += 100;
+            height += 100;
           });
         },
         onLongPressMoveUpdate: (details) {
@@ -47,7 +49,7 @@ class _ResizableImageState extends State<ResizableImage> {
             developer.log(y.toString(), name: "y : ");
           });
         },
-        child: Image.network(
+        child: Image.file(
           widget.image,
           width: width,
           height: height,

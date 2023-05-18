@@ -5,10 +5,16 @@ class PageCreateReqDto {
   List<String> characterName;
   List<String> characterPrompt;
   String imgUrl;
-  int pageNum;
+  int pageNum, x, y;
 
-  PageCreateReqDto(this.content, this.characterName, this.characterPrompt,
-      this.imgUrl, this.pageNum);
+  PageCreateReqDto(
+      {required this.content,
+      required this.characterName,
+      required this.characterPrompt,
+      required this.imgUrl,
+      required this.pageNum,
+      required this.x,
+      required this.y});
 
   String toJson() => json.encode({
         "content": content,

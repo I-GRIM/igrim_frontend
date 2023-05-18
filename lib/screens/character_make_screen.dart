@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:igrim/exceptions/base_exception.dart';
 import 'package:igrim/models/character_model.dart';
 import 'package:igrim/screens/drawing_screen.dart';
 import 'package:igrim/screens/story_make_screen.dart';
@@ -18,6 +19,7 @@ class CharacterMakeScreen extends StatefulWidget {
 
 class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
   final storyMakingPath = DeviceService.makeStoryMakingDirectory();
+  
   Future<List<CharacterModel>> characters = DeviceService.getCharacters();
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,15 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        characters = DeviceService.getCharacters();
+                        try {
+                          characters = DeviceService.getCharacters();
+                        } on BaseException {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content:
+                                Text("cannot upload characters from device..."),
+                          ));
+                        }
                       });
                     },
                     child: const Text('새로고침'),

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:igrim/dtos/make_new_character_req_dto.dart';
 import 'package:igrim/dtos/make_new_character_res_dto.dart';
 import 'package:igrim/api_keys.dart';
@@ -21,7 +20,7 @@ class CharacterService {
   ) async {
     var headers = {'Authorization': 'Bearer ${await JwtService.getJwt()}'};
     var request = http.MultipartRequest(
-        'POST', Uri.parse('http://52.79.134.7:8080/api/character'));
+        'POST', Uri.parse('http://$BACKEND_URL:8080/api/character'));
     //request.fields.addAll({'value': '{"name" : "${makeNewCharacterReqDto.name}"}'});
     request.files.add(
       http.MultipartFile.fromBytes(
@@ -36,12 +35,13 @@ class CharacterService {
     );
     request.files.add(await http.MultipartFile.fromPath('charac', imagePath));
     request.headers.addAll(headers);
-
+    developer.log("send requiest", name: "createCharacter");
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 201) {
-      developer.log(response.toString());
-      return MakeNewCharacterResDto(response.stream.toString());
+      String res = await response.stream.bytesToString();
+      developer.log(res, name: "reponse");
+      return MakeNewCharacterResDto.fromJson(json.decode(res));
     } else {
       developer.log(await response.stream.bytesToString());
       throw BaseException(ErrorCode.NEED_SIGN_IN, "오류");

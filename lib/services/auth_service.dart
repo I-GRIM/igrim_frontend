@@ -11,7 +11,7 @@ import 'dart:developer' as developer;
 
 class AuthService {
   // 요청 url
-  static const String baseURL = "http://$BACKEND_URL/api/auth";
+  static const String baseURL = "http://$BACKEND_URL:8080/api/auth";
 
   static Future<LoginResDto> userLogin(LoginReqDto loginReqDto) async {
     //api

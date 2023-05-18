@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:igrim/dtos/login_req_dto.dart';
-import 'package:igrim/exceptions/base_exception.dart';
 import 'package:igrim/screens/home_screen.dart';
 import 'package:igrim/services/auth_service.dart';
 import 'dart:developer' as developer;
@@ -120,15 +119,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => HomeScreen()))
+                                            builder: (context) =>
+                                                HomeScreen())),
                                   }
                               })
                         });
-                  } on BaseException catch (e) {
+                  } on Exception catch (e) {
                     Navigator.of(context).pop();
-                    developer.log(e.msg, name: "LoginScreen");
+                    developer.log(e.toString(), name: "LoginScreen");
                     setState(() {
-                      errorMessage = e.msg;
+                      errorMessage = e.toString();
                     });
                   }
                 },
