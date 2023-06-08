@@ -48,6 +48,7 @@ dependencies:
   dio: ^4.0.0
   zoom_widget: ^2.0.1
   page_flip: ^0.0.3
+  fluttertoast: ^8.2.1
 
 dev_dependencies:
   flutter_test:
@@ -77,6 +78,8 @@ flutter:
     - assets/imgs/add_character.png
     - assets/imgs/logo.jpg
     - assets/imgs/story_viewer_background.jpg
+    - assets/imgs/main_background.jpg
+    - assets/imgs/back.png
   fonts:
     - family: GamjaFlower
       fonts:

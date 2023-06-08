@@ -9,6 +9,7 @@ import 'package:igrim/dtos/get_all_story_res_dto.dart';
 import 'package:igrim/dtos/get_story_by_id_res_dto.dart';
 import 'package:igrim/dtos/page_create_req_dto.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:igrim/dtos/page_create_res_dto.dart';
 
 import 'package:igrim/dtos/story_create_req_dto.dart';
 import 'package:igrim/dtos/story_create_res_dto.dart';
@@ -70,12 +71,14 @@ class StoryService {
     }
   }
 
-  static Future<String> createPage(
+  static Future<PageCreateResDto> createPage(
       String storyId, PageCreateReqDto pageCreateReqDto) async {
     List<CharacterModel> characters = await DeviceService.getCharacters();
     final url = Uri.parse("$baseURL/$storyId");
     var headers = {'Authorization': 'Bearer ${await JwtService.getJwt()}'};
     var request = http.MultipartRequest('POST', Uri.parse("$baseURL/$storyId"));
+    developer.log(pageCreateReqDto.x.toString(), name: "x");
+    developer.log(pageCreateReqDto.y.toString(), name: "y");
 
     //request.fields.addAll({'value': '{"name" : "${makeNewCharacterReqDto.name}"}'});
     request.files.add(
@@ -108,10 +111,13 @@ class StoryService {
 
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
-    if (response.statusCode == 200) {
+    developer.log(response.statusCode.toString(), name: "reponse");
+
+    if (response.statusCode == 201) {
       String res = await response.stream.bytesToString();
-      developer.log(res, name: "reponse");
-      return (json.decode(res))['imgUrl'];
+      var dict = json.decode(res);
+      developer.log(response.statusCode.toString(), name: "reponse");
+      return PageCreateResDto.fromJson(dict);
     } else {
       developer.log(await response.stream.bytesToString());
       throw BaseException(ErrorCode.NEED_SIGN_IN, "오류");

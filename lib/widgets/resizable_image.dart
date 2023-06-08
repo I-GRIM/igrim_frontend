@@ -5,10 +5,9 @@ import 'dart:developer' as developer;
 
 class ResizableImage extends StatefulWidget {
   final File image;
-  const ResizableImage({
-    super.key,
-    required this.image,
-  });
+  final Function(int, int) onUpdate;
+  const ResizableImage(
+      {super.key, required this.image, required this.onUpdate});
 
   @override
   _ResizableImageState createState() => _ResizableImageState();
@@ -18,8 +17,8 @@ class _ResizableImageState extends State<ResizableImage> {
   final double _scale = 1.0;
   double width = 100.0;
   double height = 100.0;
-  double x = 10.0;
-  double y = 10.0;
+  double x = 300.0;
+  double y = 150.0;
   @override
   Widget build(BuildContext context) {
     return Positioned(
@@ -42,12 +41,18 @@ class _ResizableImageState extends State<ResizableImage> {
           });
         },
         onLongPressMoveUpdate: (details) {
-          setState(() {
-            x = details.localPosition.dx;
-            y = details.localPosition.dy;
-            developer.log(x.toString(), name: "x : ");
-            developer.log(y.toString(), name: "y : ");
-          });
+          RenderBox? stackRenderBox = context.findRenderObject() as RenderBox?;
+          if (stackRenderBox != null) {
+            Offset localOffset =
+                stackRenderBox.globalToLocal(details.globalPosition);
+            setState(() {
+              x = localOffset.dx;
+              y = localOffset.dy;
+              developer.log(x.toString(), name: "x");
+              developer.log(y.toString(), name: "y");
+              widget.onUpdate(x.ceil(), y.ceil());
+            });
+          }
         },
         child: Image.file(
           widget.image,

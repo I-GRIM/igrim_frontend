@@ -1,9 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart' hide Image;
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:igrim/dtos/make_new_character_req_dto.dart';
 import 'package:igrim/dtos/make_new_character_res_dto.dart';
-import 'package:igrim/exceptions/base_exception.dart';
 import 'package:igrim/models/drawing_mode.dart';
 import 'package:igrim/models/sketch.dart';
 import 'package:igrim/services/character_service.dart';
@@ -57,14 +57,19 @@ class DrawingScreen extends HookWidget {
               Navigator.of(context).pop(), //pop drawing screen
               Navigator.of(context).pop(), //pop 캐릭터를 입력해주세요
             });
-      } on BaseException catch (e) {
+      } on Exception catch (e) {
         Navigator.of(context).pop(); //pop 저장중
         Navigator.of(context).pop(); //pop drawing screen
         Navigator.of(context).pop(); //po
         developer.log(e.toString(), name: "error");
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("cannot upload characters from device..."),
-        ));
+        Fluttertoast.showToast(
+            msg: e.toString(),
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.white,
+            textColor: Colors.red,
+            fontSize: 16.0);
       }
     }
 

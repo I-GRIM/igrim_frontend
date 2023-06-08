@@ -39,10 +39,10 @@ class OpenApiService {
     }
   }
 
-  static Future<String> getCharacterPrompt(String story) async {
+  static Future<String> getCharacterPrompt(String story, String name) async {
     OpenAI.apiKey = GPT_API_KEY;
     String prompt =
-        "Can you describe emotions and behavior of each characters in the following story in this format? {a boy : sad, happy} DON'T INCLUDE ANY OTHER DESCRIPTION and answer in English \n";
+        "Describe emotions and behavior of $name in the following story only in Englinsh object String and just put null if there is no emotions or behavior. ex) {$name : {emotion : null, behavior : walking}} or {$name : {emotion : happy, behavior: walking, eating}}";
     try {
       OpenAIChatCompletionModel chatCompletion =
           await OpenAI.instance.chat.create(

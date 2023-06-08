@@ -31,7 +31,8 @@ class HomeScreen extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(
             image: DecorationImage(
-                fit: BoxFit.fill, image: AssetImage("main_background.jpg"))),
+                fit: BoxFit.fill,
+                image: AssetImage("assets/imgs/main_background.jpg"))),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -83,15 +84,27 @@ class HomeScreen extends StatelessWidget {
       itemCount: snapshot.data!.length,
       itemBuilder: (BuildContext context, int index) {
         var story = snapshot.data![index];
-        return StoryWidget(
-          storyId: story.id,
-          title: story.title,
-          thumb: Image.asset(
-            "assets/imgs/logo.jpg",
-            height: 300,
-            width: 300,
-          ),
-        );
+        if (story.titleImgUrl == "0") {
+          return StoryWidget(
+            storyId: story.id,
+            title: story.title,
+            thumb: Image.asset(
+              "assets/imgs/logo.jpg",
+              height: 300,
+              width: 300,
+            ),
+          );
+        } else {
+          return StoryWidget(
+            storyId: story.id,
+            title: story.title,
+            thumb: Image.network(
+              story.titleImgUrl,
+              height: 300,
+              width: 300,
+            ),
+          );
+        }
       },
       separatorBuilder: (BuildContext context, int index) => const SizedBox(
         width: 40,

@@ -35,8 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   children: [
                     SizedBox(
-                        width: 200,
-                        height: 150,
+                        width: 280,
+                        height: 280,
                         /*decoration: BoxDecoration(
                             color: Colors.red,
                             borderRadius: BorderRadius.circular(50.0)),*/

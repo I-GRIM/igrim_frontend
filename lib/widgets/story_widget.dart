@@ -35,7 +35,9 @@ class StoryWidget extends StatelessWidget {
             Text(
               title,
               style: const TextStyle(
-                  fontSize: 26, fontFamily: 'GamjaFlower-Regular'),
+                  fontSize: 26,
+                  fontFamily: "assets/fonts/Cafe24Ssurround",
+                  fontWeight: FontWeight.w500),
             )
           ],
         ),

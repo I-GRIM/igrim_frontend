@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:igrim/exceptions/base_exception.dart';
 import 'package:igrim/exceptions/error_code.dart';
 import 'package:igrim/models/character_model.dart';
@@ -59,10 +61,7 @@ class DeviceService {
             final character = CharacterModel.fromJson(
                 json.decode(await info.readAsString()), img);
             characters.add(character);
-          } else {
-            //error
-            throw Exception("Directory Not Found");
-          }
+          } else {}
         });
       } else {
         //characters not created yet
@@ -70,7 +69,15 @@ class DeviceService {
     } catch (e) {
       //디렉토리 삭제 후 초기화
       print("chcek device_service, 45");
-      throw BaseException(ErrorCode.NEED_SIGN_IN, "Device service error");
+      Fluttertoast.showToast(
+          msg: e.toString(),
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.white,
+          textColor: Colors.red,
+          fontSize: 16.0);
+      //throw BaseException(ErrorCode.NEED_SIGN_IN, "Device service error");
     }
 
     return characters;
@@ -102,7 +109,8 @@ class DeviceService {
       await jpgFile.writeAsBytes(compressedBytes);
       await infoFile.writeAsString(jsonStr);
     } else {
-      throw BaseException(ErrorCode.NEED_SIGN_IN,"Character Make Directory Does Not Exist");
+      throw BaseException(
+          ErrorCode.NEED_SIGN_IN, "Character Make Directory Does Not Exist");
     }
 
     return id;
@@ -125,8 +133,8 @@ class DeviceService {
         developer.log(jpgFile.toString(), name: "jpgFile");
       }
     } else {
-      
-      throw BaseException(ErrorCode.NEED_SIGN_IN,"Character Make Directory Does Not Exist");
+      throw BaseException(
+          ErrorCode.NEED_SIGN_IN, "Character Make Directory Does Not Exist");
     }
 
     return id;

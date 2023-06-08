@@ -22,6 +22,8 @@ class PageCreateReqDto {
         "characterPrompt": characterPrompt,
         "imgUrl": imgUrl,
         "pageNum": pageNum,
+        "x": x,
+        "y": y
       });
 
   @override

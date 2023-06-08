@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:igrim/dtos/page_create_req_dto.dart';
 import 'package:igrim/exceptions/base_exception.dart';
 import 'package:igrim/models/character_model.dart';
+import 'package:igrim/screens/home_screen.dart';
 import 'package:igrim/services/device_service.dart';
 import 'package:igrim/services/open_api_service.dart';
 import 'package:igrim/services/story_service.dart';
 import 'package:igrim/widgets/loading_widget.dart';
 import 'dart:developer' as developer;
 
-import 'package:igrim/widgets/resizable_image.dart';
+import 'package:igrim/widgets/notify_widget.dart';
 
 class StoryMakeScreen extends StatefulWidget {
   final String storyId;
@@ -26,14 +28,16 @@ class _StoryMakeScreenState extends State<StoryMakeScreen> {
   TextEditingController textEditingController = TextEditingController();
   String url =
       "https://liftlearning.com/wp-content/uploads/2020/09/default-image.png";
-
+  double x = 0.0;
+  double y = 0.0;
   @override
   Widget build(BuildContext context) {
-    Future<List<CharacterModel>> characters = DeviceService.getCharacters();
     developer.log("build StoryMakeScreen", name: "StoryMakeScreen");
     return FutureBuilder(
       future: characters,
       builder: (context, snapshot) {
+        double prex = 0.0;
+        double prey = 0.0;
         if (snapshot.hasData) {
           return Scaffold(
               resizeToAvoidBottomInset: false,
@@ -45,156 +49,253 @@ class _StoryMakeScreenState extends State<StoryMakeScreen> {
               ),
               body: Container(
                   margin: const EdgeInsets.all(10),
-                  child: Column(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Stack(children: [
-                        Image.network(
-                          url,
-                          height: 300,
-                          width: 600,
-                          loadingBuilder: (BuildContext context, Widget child,
-                              ImageChunkEvent? loadingProgress) {
-                            if (loadingProgress == null) {
-                              return child;
-                            }
-                            return Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                    : null,
+                      Expanded(
+                        child: Stack(children: [
+                          Positioned(
+                            child: Image.network(
+                              url,
+                              height: 512,
+                              width: 512,
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent? loadingProgress) {
+                                if (loadingProgress == null) {
+                                  return Center(
+                                      heightFactor: 512,
+                                      widthFactor: 512,
+                                      child: child);
+                                }
+                                return Center(
+                                  heightFactor: 512,
+                                  widthFactor: 512,
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                        : null,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          for (var v in snapshot.data!.asMap().entries)
+                            Positioned(
+                              left: x,
+                              top: y,
+                              child: GestureDetector(
+                                child: Image.file(v.value.image),
+                                onPanDown: (details) {
+                                  prex = details.localPosition.dx;
+                                  prey = details.localPosition.dy;
+                                },
+                                onPanUpdate: (DragUpdateDetails details) {
+                                  double xx = details.delta.dx;
+                                  double yy = details.delta.dy;
+                                  x += xx;
+                                  y += yy;
+                                  x = x.clamp(0, 512 - 100);
+                                  y = y.clamp(0, 512 - 100);
+                                  developer.log("$x, $y", name: "x,y");
+
+                                  setState(() {});
+                                },
                               ),
-                            );
-                          },
-                        ),
-                        for (var v in snapshot.data!)
-                          ResizableImage(image: v.image)
-                      ]),
+                            )
+                        ]),
+                      ),
                       const SizedBox(
                         height: 3,
                       ),
-                      TextField(
-                        controller: textEditingController,
-                        keyboardType: TextInputType.multiline,
-                        maxLines: 5,
-                        style: const TextStyle(fontSize: 20),
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: "이야기를 작성해주세요",
-                        ),
-                      ),
-                      Row(
+                      Column(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                try {
-                                  characters = DeviceService.getCharacters();
-                                } on BaseException {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(const SnackBar(
-                                    content: Text(
-                                        "cannot upload characters from device..."),
-                                  ));
-                                }
-                              });
-                            },
-                            child: const Text('새로고침'),
+                          SizedBox(
+                            width: 550,
+                            child: TextField(
+                              controller: textEditingController,
+                              keyboardType: TextInputType.multiline,
+                              maxLines: 10,
+                              style: const TextStyle(fontSize: 20),
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: "이야기를 작성해주세요",
+                              ),
+                            ),
                           ),
-                          const SizedBox(width: 20),
-                          ElevatedButton(
-                            onPressed: () async {
-                              showDialog(
-                                  // The user CANNOT close this dialog  by pressing outsite it
-                                  barrierDismissible: false,
-                                  context: context,
-                                  builder: (_) {
-                                    return const LoadingWidget(
-                                        text: "배경 이미지 생성중...");
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    try {
+                                      characters =
+                                          DeviceService.getCharacters();
+                                    } on BaseException {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                        content: Text(
+                                            "cannot upload characters from device..."),
+                                      ));
+                                    }
                                   });
-                              developer.log(textEditingController.text);
-                              url = await OpenApiService.generateImage(
-                                  await OpenApiService.getKeywords(
-                                      textEditingController.text));
-                              developer.log(url, name: "StoryMakeScreen");
-                              setState(() {
-                                Navigator.of(context).pop();
-                              });
-                            },
-                            child: const Text('그림 생성'),
-                          ),
-                          const SizedBox(width: 20),
-                          ElevatedButton(
-                            onPressed: () async {
-                              showDialog(
-                                  // The user CANNOT close this dialog  by pressing outsite it
-                                  barrierDismissible: false,
-                                  context: context,
-                                  builder: (_) {
-                                    return const LoadingWidget(
-                                        text: "데이터 전송중...");
-                                  });
-                              try {
-                                // createPage API 연결
-                                String response =
-                                    await OpenApiService.getCharacterPrompt(
-                                        textEditingController.text);
-                                List<String> parsedResponse =
-                                    response.split("\n");
-                                List<String> characterName = [];
-                                List<String> characterPrompt = [];
-
-                                for (String line in parsedResponse) {
-                                  if (line.contains(":")) {
-                                    List<String> splits = line.split(":");
-                                    characterName.add(splits[0]);
-                                    characterPrompt.add(splits[1]);
-                                  } else {
-                                    break;
-                                  }
-                                }
-
-                                parsedResponse[0].split(":")[0];
-                                // TODO : createPage api에 캐릭터 좌표도 필요
-                                StoryService.createPage(
-                                  widget.storyId,
-                                  PageCreateReqDto(
-                                    content: textEditingController.text,
-                                    characterName: characterName,
-                                    characterPrompt: characterPrompt,
-                                    imgUrl: url,
-                                    pageNum: currentPage,
-                                    x: 500,
-                                    y: 750,
-                                  ),
-                                ).then((value) => {
-                                      Navigator.of(context).pop(),
-                                      textEditingController.clear(),
-                                      currentPage++,
-                                      url = defaultUrl,
-                                      setState(() {}),
+                                },
+                                child: const Text('새로고침'),
+                              ),
+                              const SizedBox(width: 20),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  showDialog(
+                                      // The user CANNOT close this dialog  by pressing outsite it
+                                      barrierDismissible: false,
+                                      context: context,
+                                      builder: (_) {
+                                        return const LoadingWidget(
+                                            text: "배경 이미지 생성중...");
+                                      });
+                                  developer.log(textEditingController.text);
+                                  try {
+                                    url = await OpenApiService.generateImage(
+                                        await OpenApiService.getKeywords(
+                                            textEditingController.text));
+                                    developer.log(url, name: "StoryMakeScreen");
+                                    setState(() {
+                                      Navigator.of(context).pop();
                                     });
-                              } on Exception {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(const SnackBar(
-                                  content: Text("오류. 다시시도 해주세요..."),
-                                ));
-                              }
-                            },
-                            child: const Text('다음 장면'),
-                          ),
-                          const SizedBox(width: 20),
-                          ElevatedButton(
-                            onPressed: () async {
-                              Navigator.of(context)
-                                  .popUntil((route) => route.isFirst);
-                            },
-                            child: const Text('완료하기'),
+                                  } on Exception catch (e) {
+                                    Navigator.of(context).pop();
+                                    Fluttertoast.showToast(
+                                        msg: e.toString(),
+                                        toastLength: Toast.LENGTH_SHORT,
+                                        gravity: ToastGravity.CENTER,
+                                        timeInSecForIosWeb: 1,
+                                        backgroundColor: Colors.white,
+                                        textColor: Colors.red,
+                                        fontSize: 16.0);
+                                  }
+                                },
+                                child: const Text('그림 생성'),
+                              ),
+                              const SizedBox(width: 20),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  showDialog(
+                                      // The user CANNOT close this dialog  by pressing outsite it
+                                      barrierDismissible: false,
+                                      context: context,
+                                      builder: (_) {
+                                        return const LoadingWidget(
+                                            text: "데이터 전송중...");
+                                      });
+                                  try {
+                                    // createPage API 연결
+                                    List<CharacterModel> charac =
+                                        await characters;
+                                    String response =
+                                        await OpenApiService.getCharacterPrompt(
+                                            textEditingController.text,
+                                            charac[0].name);
+                                    List<String> parsedResponse =
+                                        response.split("\n");
+                                    List<String> characterName = [];
+                                    List<String> characterPrompt = [];
+
+                                    for (String line in parsedResponse) {
+                                      if (line.contains(":")) {
+                                        List<String> splits = line.split(":");
+                                        characterName.add(splits[0]);
+                                        characterPrompt.add(splits[1]);
+                                      } else {
+                                        break;
+                                      }
+                                    }
+
+                                    parsedResponse[0].split(":")[0];
+
+                                    // TODO : createPage api에 캐릭터 좌표도 필요
+                                    StoryService.createPage(
+                                      widget.storyId,
+                                      PageCreateReqDto(
+                                          content: textEditingController.text,
+                                          characterName: characterName,
+                                          characterPrompt: characterPrompt,
+                                          imgUrl: url,
+                                          pageNum: currentPage,
+                                          x: x.ceil(),
+                                          y: y.ceil()),
+                                    ).then((value) {
+                                      if (value.storyId == "") {
+                                        Navigator.of(context).pop();
+                                        Fluttertoast.showToast(
+                                            msg: "문법을 확인 해 주세요",
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.CENTER,
+                                            timeInSecForIosWeb: 1,
+                                            backgroundColor: Colors.white,
+                                            textColor: Colors.red,
+                                            fontSize: 16.0);
+                                        //변경하려는 텍스트
+                                        String txt = textEditingController.text;
+                                        //문법 오류
+
+                                        List<String> parse =
+                                            value.content.split(",");
+                                        List<String> wrong = [];
+                                        List<String> right = [];
+                                        for (var element in parse) {
+                                          wrong.add(element.split(" ")[1]);
+                                          right.add(element.split(" ")[2]);
+                                        }
+                                        showDialog(
+                                            // The user CANNOT close this dialog  by pressing outsite it
+                                            barrierDismissible: true,
+                                            context: context,
+                                            builder: (_) {
+                                              return NotifyWidget(
+                                                  right: right, wrong: wrong);
+                                            });
+                                      } else {
+                                        Navigator.of(context).pop();
+                                        textEditingController.clear();
+                                        currentPage++;
+                                        url = defaultUrl;
+                                        setState(() {});
+                                      }
+                                    });
+                                  } on Exception catch (e) {
+                                    Navigator.of(context).pop();
+                                    Fluttertoast.showToast(
+                                        msg: e.toString(),
+                                        toastLength: Toast.LENGTH_SHORT,
+                                        gravity: ToastGravity.CENTER,
+                                        timeInSecForIosWeb: 1,
+                                        backgroundColor: Colors.white,
+                                        textColor: Colors.red,
+                                        fontSize: 16.0);
+                                  }
+                                },
+                                child: const Text('다음 장면'),
+                              ),
+                              const SizedBox(width: 20),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => HomeScreen()));
+                                },
+                                child: const Text('완료하기'),
+                              )
+                            ],
                           )
                         ],
-                      )
+                      ),
                     ],
                   )));
         } else {

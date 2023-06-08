@@ -37,12 +37,15 @@ class _StoryViewerState extends State<StoryViewer> {
                       decoration: const BoxDecoration(
                           image: DecorationImage(
                               fit: BoxFit.cover,
-                              image:
-                                  AssetImage("story_viewer_background.jpg"))),
+                              image: AssetImage(
+                                  "assets/imgs/story_viewer_background.jpg"))),
                       child: Column(
                         children: [
                           Image.network(
                             snapshot.data?[index].imgUrl ?? "deafult",
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset("/assets/imgs/logo.png");
+                            },
                           ),
                           const SizedBox(height: 10),
                           Container(
