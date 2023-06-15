@@ -23,6 +23,7 @@ class _testState extends State<test> {
           margin: const EdgeInsets.all(10),
           child: Column(children: [
             TextField(controller: textEditingController),
+            Text(txt),
             TextButton(
               onPressed: () async {
                 String result = await OpenApiService.getCharacterPrompt(
@@ -33,7 +34,6 @@ class _testState extends State<test> {
               },
               child: const Text("Go", style: TextStyle(fontSize: 100)),
             ),
-            Text(txt),
           ]),
         ));
   }

@@ -95,9 +95,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: TextButton(
                 onPressed: () async {
-                  developer.log(
-                      "email : ${emailController.text}, password : ${passwordController.text}",
-                      name: "LoginScreen");
                   showDialog(
                       // The user CANNOT close this dialog  by pressing outsite it
                       barrierDismissible: false,

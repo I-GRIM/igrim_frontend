@@ -80,6 +80,7 @@ flutter:
     - assets/imgs/story_viewer_background.jpg
     - assets/imgs/main_background.jpg
     - assets/imgs/back.png
+    - assets/imgs/dongyeon_boy.png
   fonts:
     - family: GamjaFlower
       fonts:

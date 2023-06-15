@@ -11,15 +11,19 @@ class NotifyWidget extends StatelessWidget {
       backgroundColor: Colors.white,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (int i = 0; i < right.length; i++)
-              Text(
-                "${wrong[i]}(를)을 ${right[i]}(으)로 바꿔주세요",
-                style: const TextStyle(fontSize: 16),
-              )
-          ],
+        child: Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (int i = 0; i < right.length; i++)
+                Text(
+                  "${wrong[i]}(를)을 ${right[i]}(으)로 바꿔주세요",
+                  style: const TextStyle(fontSize: 16),
+                )
+            ],
+          ),
         ),
       ),
     );

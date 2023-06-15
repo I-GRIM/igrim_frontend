@@ -42,7 +42,7 @@ class OpenApiService {
   static Future<String> getCharacterPrompt(String story, String name) async {
     OpenAI.apiKey = GPT_API_KEY;
     String prompt =
-        "Describe emotions and behavior of $name in the following story only in Englinsh object String and just put null if there is no emotions or behavior. ex) {$name : {emotion : null, behavior : walking}} or {$name : {emotion : happy, behavior: walking, eating}}";
+        "Describe emotions and behavior of $name in the following story only in Englinsh json object String and just put null if there is no emotions or behavior. ex) {$name : {emotion : null, behavior : walking}} or {$name : {emotion : happy, behavior: walking, eating hamburger}}";
     try {
       OpenAIChatCompletionModel chatCompletion =
           await OpenAI.instance.chat.create(
@@ -56,7 +56,7 @@ class OpenApiService {
       );
 
       String response = chatCompletion.choices[0].message.content;
-      developer.log(response, name: "OpenApi service");
+      developer.log(response, name: "Demo");
 
       return response;
     } on Exception catch (e) {
@@ -68,7 +68,7 @@ class OpenApiService {
   static Future<String> getKeywords(String story) async {
     OpenAI.apiKey = GPT_API_KEY;
     String prompt =
-        "Can you make me a DALL-E prompt for the background scene of the following story in English? Don't include any character related keyword like Boy, girl. I just want to make a background Image. \n $story";
+        "Can you make me a DALL-E prompt for the animation style background scene of the following story in English? Don't include any character related keyword like Boy, girl. I just want to make a background Image. \n $story";
     try {
       OpenAIChatCompletionModel chatCompletion =
           await OpenAI.instance.chat.create(
@@ -82,7 +82,7 @@ class OpenApiService {
       );
 
       String response = chatCompletion.choices[0].message.content;
-      developer.log(response, name: "StoryService");
+      developer.log(response, name: "Demo");
       return response;
     } on Exception {
       return "Error";
@@ -96,7 +96,7 @@ class OpenApiService {
       size: OpenAIImageSize.size512,
       responseFormat: OpenAIImageResponseFormat.url,
     );
-    developer.log(image.data[0].toString(), name: "StoryService");
+    developer.log(image.data[0].toString(), name: "Demo");
     print(image.data[0].url);
     if (image.data[0].url == null) {
       return "default Url";

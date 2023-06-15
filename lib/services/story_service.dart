@@ -79,7 +79,7 @@ class StoryService {
     var request = http.MultipartRequest('POST', Uri.parse("$baseURL/$storyId"));
     developer.log(pageCreateReqDto.x.toString(), name: "x");
     developer.log(pageCreateReqDto.y.toString(), name: "y");
-
+    developer.log(pageCreateReqDto.characterPrompt.toString(), name: "prompt");
     //request.fields.addAll({'value': '{"name" : "${makeNewCharacterReqDto.name}"}'});
     request.files.add(
       http.MultipartFile.fromBytes(

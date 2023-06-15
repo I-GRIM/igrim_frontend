@@ -139,4 +139,15 @@ class DeviceService {
 
     return id;
   }
+
+  static Future<String> addDongYeon() async {
+    String s = await DeviceService.saveCharacterFile(
+        (await rootBundle.load('assets/imgs/dongyeon_boy.png'))
+            .buffer
+            .asUint8List(),
+        "jpg",
+        "dongyeon",
+        "동연");
+    return s;
+  }
 }

@@ -19,7 +19,6 @@ class CharacterMakeScreen extends StatefulWidget {
 
 class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
   final storyMakingPath = DeviceService.makeStoryMakingDirectory();
-  
   Future<List<CharacterModel>> characters = DeviceService.getCharacters();
   @override
   Widget build(BuildContext context) {
@@ -87,6 +86,15 @@ class _CharacterMakeScreenState extends State<CharacterMakeScreen> {
                     },
                     child: const Text('새로운 캐릭터 만들기'),
                   ),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  ElevatedButton(
+                      onPressed: () async {
+                        await DeviceService.addDongYeon();
+                        setState(() {});
+                      },
+                      child: const Text("동연이 캐릭터")),
                   const SizedBox(
                     width: 20,
                   ),

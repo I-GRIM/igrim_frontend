@@ -186,7 +186,7 @@ class _StoryMakeScreenState extends State<StoryMakeScreen> {
                                 // createPage API 연결
                                 String response =
                                     await OpenApiService.getCharacterPrompt(
-                                        textEditingController.text);
+                                        textEditingController.text, "동연");
                                 List<String> parsedResponse =
                                     response.split("\n");
                                 List<String> characterName = [];

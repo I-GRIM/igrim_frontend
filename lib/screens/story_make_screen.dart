@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:igrim/dtos/page_create_req_dto.dart';
@@ -201,73 +203,95 @@ class _StoryMakeScreenState extends State<StoryMakeScreen> {
                                         await OpenApiService.getCharacterPrompt(
                                             textEditingController.text,
                                             charac[0].name);
-                                    List<String> parsedResponse =
-                                        response.split("\n");
-                                    List<String> characterName = [];
-                                    List<String> characterPrompt = [];
-
-                                    for (String line in parsedResponse) {
-                                      if (line.contains(":")) {
-                                        List<String> splits = line.split(":");
-                                        characterName.add(splits[0]);
-                                        characterPrompt.add(splits[1]);
-                                      } else {
-                                        break;
+                                    developer.log(response[0]);
+                                    if (response.isEmpty ||
+                                        response[0] != '{') {
+                                      Navigator.of(context).pop();
+                                      Fluttertoast.showToast(
+                                          msg: "unable to parse gpt prompt",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.CENTER,
+                                          timeInSecForIosWeb: 1,
+                                          backgroundColor: Colors.white,
+                                          textColor: Colors.red,
+                                          fontSize: 16.0);
+                                    } else {
+                                      // {"상윤": {"emotion": "happy", "behavior": "eating snacks"}}
+                                      developer.log(charac[0].name);
+                                      Map<String, dynamic> data =
+                                          json.decode(response);
+                                      String emotions =
+                                          data[charac[0].name]['emotion'] ?? "";
+                                      String behavior = data[charac[0].name]
+                                              ['behavior'] ??
+                                          "";
+                                      List<String> pt = [];
+                                      if (emotions.contains("null") ||
+                                          emotions.contains("neutral")) {
+                                        emotions = "";
                                       }
-                                    }
+                                      if (behavior.contains("null")) {
+                                        behavior = "";
+                                      }
+                                      developer.log(charac[0].name,
+                                          name: "name");
+                                      developer.log(emotions, name: "emotions");
+                                      developer.log(behavior, name: "behavior");
+                                      // TODO : createPage api에 캐릭터 좌표도 필요
+                                      StoryService.createPage(
+                                        widget.storyId,
+                                        PageCreateReqDto(
+                                            content: textEditingController.text,
+                                            characterName: [charac[0].name],
+                                            characterPrompt: [
+                                              emotions,
+                                              behavior
+                                            ],
+                                            imgUrl: url,
+                                            pageNum: currentPage,
+                                            x: x.ceil(),
+                                            y: y.ceil()),
+                                      ).then((value) {
+                                        if (value.storyId == "") {
+                                          Navigator.of(context).pop();
+                                          Fluttertoast.showToast(
+                                              msg: "문법을 확인 해 주세요",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.CENTER,
+                                              timeInSecForIosWeb: 1,
+                                              backgroundColor: Colors.white,
+                                              textColor: Colors.red,
+                                              fontSize: 16.0);
+                                          //변경하려는 텍스트
+                                          String txt =
+                                              textEditingController.text;
+                                          //문법 오류
 
-                                    parsedResponse[0].split(":")[0];
-
-                                    // TODO : createPage api에 캐릭터 좌표도 필요
-                                    StoryService.createPage(
-                                      widget.storyId,
-                                      PageCreateReqDto(
-                                          content: textEditingController.text,
-                                          characterName: characterName,
-                                          characterPrompt: characterPrompt,
-                                          imgUrl: url,
-                                          pageNum: currentPage,
-                                          x: x.ceil(),
-                                          y: y.ceil()),
-                                    ).then((value) {
-                                      if (value.storyId == "") {
-                                        Navigator.of(context).pop();
-                                        Fluttertoast.showToast(
-                                            msg: "문법을 확인 해 주세요",
-                                            toastLength: Toast.LENGTH_SHORT,
-                                            gravity: ToastGravity.CENTER,
-                                            timeInSecForIosWeb: 1,
-                                            backgroundColor: Colors.white,
-                                            textColor: Colors.red,
-                                            fontSize: 16.0);
-                                        //변경하려는 텍스트
-                                        String txt = textEditingController.text;
-                                        //문법 오류
-
-                                        List<String> parse =
-                                            value.content.split(",");
-                                        List<String> wrong = [];
-                                        List<String> right = [];
-                                        for (var element in parse) {
-                                          wrong.add(element.split(" ")[1]);
-                                          right.add(element.split(" ")[2]);
+                                          List<String> parse =
+                                              value.content.split(",");
+                                          List<String> wrong = [];
+                                          List<String> right = [];
+                                          for (var element in parse) {
+                                            wrong.add(element.split(" ")[1]);
+                                            right.add(element.split(" ")[2]);
+                                          }
+                                          showDialog(
+                                              // The user CANNOT close this dialog  by pressing outsite it
+                                              barrierDismissible: true,
+                                              context: context,
+                                              builder: (_) {
+                                                return NotifyWidget(
+                                                    right: right, wrong: wrong);
+                                              });
+                                        } else {
+                                          Navigator.of(context).pop();
+                                          textEditingController.clear();
+                                          currentPage++;
+                                          url = defaultUrl;
+                                          setState(() {});
                                         }
-                                        showDialog(
-                                            // The user CANNOT close this dialog  by pressing outsite it
-                                            barrierDismissible: true,
-                                            context: context,
-                                            builder: (_) {
-                                              return NotifyWidget(
-                                                  right: right, wrong: wrong);
-                                            });
-                                      } else {
-                                        Navigator.of(context).pop();
-                                        textEditingController.clear();
-                                        currentPage++;
-                                        url = defaultUrl;
-                                        setState(() {});
-                                      }
-                                    });
+                                      });
+                                    }
                                   } on Exception catch (e) {
                                     Navigator.of(context).pop();
                                     Fluttertoast.showToast(
